@@ -1,6 +1,9 @@
 # Local-only project manuals and agent memory. At the repository root,
 # only README.md and the extensionless LICENSE are published.
-/docs/
+/docs/*
+!/docs/migrations/
+/docs/migrations/*
+!/docs/migrations/kit-extraction-v2.md
 /AGENTS.md
 /*.md
 !/README.md
