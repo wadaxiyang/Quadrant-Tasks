@@ -9,7 +9,7 @@
 - Source checkout: ordinary, non-shallow Git repository; `.git` and common directory are both `.git`; one registered worktree.
 - Migration branch: `codex/kit-extraction-v2`.
 - Local safety tag: `pre-kit-extraction-20260905-phase0`, pointing to the baseline source commit. It is not a release tag and was not pushed.
-- Actual extraction source commit: not selected yet; recheck source changes before Phase 1.
+- Actual extraction source commit: `5a2262cd480d639673fa4f5dd406a9c7196361b5`, selected after a clean Phase 1 preflight; implementation bytes match the audited code commit.
 - Tasks pre-cutover commit: not selected yet.
 
 The user confirmed that the existing repository and its history belong to the future `Quadrant-Tasks` directory. Its existing remote is already named `Quadrant-Tasks` and points to `https://github.com/wadaxiyang/Quadrant-Tasks.git`. This differs from the historical application URL in the SPEC. Preserve this actual configuration; do not rename the remote or initialize a replacement repository.
@@ -71,16 +71,62 @@ The `native/manifest.json` records scenarios, source SHA, image hashes, and defa
 - MSRV 1.92 build, Linux/macOS checks, release/package runs, real cross-monitor DPI tests, full native business/lifecycle checks, and accessibility interactions: NOT_RUN.
 - The native notification test is intentionally ignored by the existing suite; no claim of notification delivery validation.
 - Native restore observation: first two post-restore samples were blank, recovering approximately 80 ms after the restore request; severity/visual perceptibility has not been classified. Preserve this evidence for later regression comparison; do not claim a no-blank-frame baseline or modify lifecycle code during this preflight.
-- Kit remote is empty. Kit publication, retained refs, remote CI, smoke consumer, and no-sibling Tasks build: NOT_STARTED.
+- Kit remote was empty on the Phase 1 preflight. Kit publication, retained refs, remote CI, smoke consumer, and no-sibling Tasks build: NOT_STARTED.
 - Physical layout: LAYOUT_PENDING, intentionally deferred to Phase 6. The active source checkout has not been moved.
-- Licensing, asset hash/provenance manifests, 28-symbol Kit baseline/probe, and Product API baseline: NOT_STARTED. Existing attribution and assets are untouched.
+- Kit licensing/provenance records, asset hashes, 28-name API reference and compiled probe were created in Phase 1 below. The full machine-checked Kit API baseline/guard and Product API baseline remain later-phase work. Existing Tasks attribution and assets are untouched.
 
 ## Phase status and next action
 
 Phase 0 / Gate 0: PASS for local preflight, recoverable source identification, protected local materials, and the explicitly scoped Windows baseline above. Cleanup of the project root is complete through reversible relocation; permanent destruction of the archived upstream checkout remains BLOCKED by automatic approval review. Future P0 checks listed above are not waived.
 
-Phases 1–7: NOT_STARTED. Overall migration: NOT_STARTED beyond preflight; not COMPLETE.
+Phase 1 / Gate 1: PASS, as detailed below. Phases 2–7: NOT_STARTED as gated stages; some local Phase 2 commands were run early to validate the candidate. Overall migration: IN_PROGRESS, not COMPLETE. Physical layout remains LAYOUT_PENDING.
 
-Next planned stage: create the independent Kit candidate outside the current source Git root, extract from a rechecked source commit, and keep Tasks consuming its existing embedded Kit. Before that stage, inspect the intended destination and recheck the empty remote to avoid overwriting concurrent work.
+Next planned stage: Phase 2 — finish the versioned Kit boundary/API guard and checker fixtures, API baseline, incremental resource checks, and required platform/CI validation. Tasks continues consuming its embedded Kit. Gate 3 publication and verified remote consumption must pass before any Product cutover.
 
 Recovery: the original `master` branch and source commit remain unchanged. The local safety tag and verified private bundle preserve Git history. Product source, Cargo manifests, and lockfile have not changed in Phase 0. Do not reset new user changes to recover a previous state; inspect status and use the recorded source reference deliberately.
+
+## Phase 1 — independent local Kit candidate (2026-09-06)
+
+Source preflight was clean on `codex/kit-extraction-v2` at `5a2262cd480d639673fa4f5dd406a9c7196361b5`. Changes since the audited implementation were only `.gitignore` and this ledger. The Kit destination did not exist; the target remote still advertised no refs. The candidate was created as a sibling outside this Tasks Git root, not as a nested repository or a replacement Tasks repository.
+
+| Repository | Branch | Phase 1 checkpoint |
+|---|---|---|
+| Tasks, existing checkout | `codex/kit-extraction-v2` | Original application source, Cargo manifests, lockfile, and embedded Kit/Gallery unchanged; only this ledger updated. |
+| Kit, independent checkout | `codex/extraction-candidate` | `008c9b6086f9cddc9ee5dce43bb97a26192c9ff7`; origin `https://github.com/wadaxiyang/Quadrant-Kit.git`; local only, not pushed. |
+
+The Kit checkpoint is a **local candidate SHA**, not an adopted Product dependency, retained remote reference, or published release. Its implementation was validated at `acad992704b75959f1ae2f51304864e919b5a87b`, followed by a documentation-only verification record; the final candidate was also built successfully. No Kit revision was inserted into Tasks.
+
+### Extraction and ownership
+
+- Copied 77 source/asset files from the selected source commit. Kit's `scripts/extraction_manifest.json` records old/new paths, source/extracted SHA-256 hashes, modification status, and newly authored files. All 77 extracted hashes were checked against the actual candidate files.
+- Root helper has no dependencies and exports only the library name and build-time facade path. Gallery is the only member application and uses a same-repository path build dependency. Kit has its own Cargo.lock and target directory; Tasks' lockfile was not copied or changed.
+- Public facade has 28 names. Branding, InboxItem/InboxPane, TaskRowShell, Q1–Q4, the timer font size, Focus breakpoint, and 11 product icon aliases were excluded. Product files remain in their original locations until Phase 4.
+- Retained 32 generic SVGs byte-for-byte with their MIT license. Their property/path/hash/upstream records are in `scripts/asset_manifest.json`. GPL headers and derived-code source comments remain. `.gitattributes` preserves SVG bytes and uses LF for other text files.
+- Gallery has eight pages (0–7), neutral samples, a compiled 28-name API probe, explicit per-host theme/font initialization, and a separate never-shown system-theme observer. System preference detection stays in Gallery, not the root helper or a Product platform dependency.
+- Snapshot input validation rejects removed/invalid pages, invalid preview/theme, nonfinite/nonpositive dimensions and invalid output paths. Capture tooling builds once per invocation, writes per-scene manifests keyed by source/environment/page/preview/size/theme/scale, and only reuses matching content. Ordinary renderer defaults are unchanged; reproducible snapshot runs explicitly select winit-software.
+- Kit now owns AGENTS, README, architecture/API/consumer/Gallery/provenance documentation and candidate change notes. The full boundary/API compatibility guard and baseline are explicitly deferred to Phase 2; the current distribution checker does not pretend to implement them.
+
+### Gate 1 evidence
+
+Environment: native Windows x86_64 MSVC; Rust/Cargo 1.94.1; Python 3.13.15; Slint/slint-build 1.17.1. Kit logs are in its ignored `target/phase1/`; screenshots include source IDs and remain local. Tasks' old-build log is `target/kit-extraction-phase0/tasks-phase1-build.log`. Exact local checkout/backup paths are recorded in local checkpoint metadata, not this public ledger.
+
+| Check | Result | Evidence |
+|---|---|---|
+| Tasks `cargo build --locked -p quadrant-agent -p quadrant-app` | PASS, exit 0 | Old consumption remains buildable; source/Cargo/lock diff from Phase 1 input is empty. |
+| Kit Gallery build, including API probe | PASS, exit 0 | `build-final-head.log`; all 28 symbols compile. |
+| Kit independent clone with own target and no Tasks checkout | PASS, exit 0 | `isolated-build-final.log`; asset hashes also match after Windows checkout. Shared Cargo download cache was allowed; build directories and locks were independent. This is local independence, not remote Git consumption. |
+| Kit fmt / clippy all-targets/all-features, warnings denied | PASS, exit 0 | `fmt.log`, `clippy-final.log`. |
+| Kit Rust tests | PASS: 5 tests | `tests-final.log`: 1 root helper, 4 configuration tests. |
+| Snapshot tool tests | PASS: 2 tests | `python-tests.log`: dirty content identity, stale/mismatched/corrupted scene rejection. |
+| Distribution closure and package list | PASS, exit 0 | `distribution-final.log`: 32 SVGs; required Slint, asset, license and provenance files included. |
+| `cargo package --locked -p quadrant-kit` | PASS, exit 0 | `package-final.log`: 70 packaged files, verified root helper build. This alone is not Slint runtime verification. |
+| Gallery native rendering | PASS for 12 scoped scenes | `native/results.json`: all eight pages plus Dark/System and representative 200%/225% simulated scales. Final icon-tint fix rechecked in Light Controls and Dark Navigation; `native-final/result.json`, `capture-final.log`. |
+| Native invalid configuration/output handling | PASS | 8 invalid configurations returned 1; output-directory-as-file returned 2. Local diagnostic UTF-8 logging was corrected and that output-error case rechecked. |
+| Public PowerShell capture wrapper and scene reuse | PASS | `capture-final.log`, `capture-reuse.log`; fresh scene capture and matching reuse observed. |
+| Kit root normal-dependency tree / workspace metadata | PASS | `helper-dependencies.log`, `cargo-metadata.json`: helper alone; only Kit/Gallery workspace members; no Product packages anywhere in resolved metadata. |
+
+An initial unsupported Palette property was caught by Slint compilation and replaced by the supported separate-instance host approach. Native screenshot review also caught a dark-theme contrast issue in the replacement Gallery header icon; it was fixed by using FluentIcon. Neither issue required changing Tasks or generic component behavior.
+
+**Gate 1 is satisfied:** Tasks still builds using the embedded Kit; the independent Kit checkout builds its own Gallery without Tasks; neither build writes the other's sources. There was no push, release tag, remote CI, Product dependency switch, or physical relocation of the Tasks repository.
+
+Outstanding gates retain their original scope: full API/architecture checker and tests, Rust 1.92 and Linux/macOS checks, CI, incremental token/SVG rebuild tests, remote candidate publication/retention/consumer verification, Product cutover and native regression matrix, and final parent/two-child layout. Real OS theme changes, monitor DPI transitions, keyboard/IME/accessibility interaction, and final source-free package runtime have not been claimed as tested in this phase.
