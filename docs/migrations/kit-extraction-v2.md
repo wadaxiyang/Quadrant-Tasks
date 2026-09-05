@@ -130,3 +130,42 @@ An initial unsupported Palette property was caught by Slint compilation and repl
 **Gate 1 is satisfied:** Tasks still builds using the embedded Kit; the independent Kit checkout builds its own Gallery without Tasks; neither build writes the other's sources. There was no push, release tag, remote CI, Product dependency switch, or physical relocation of the Tasks repository.
 
 Outstanding gates retain their original scope: full API/architecture checker and tests, Rust 1.92 and Linux/macOS checks, CI, incremental token/SVG rebuild tests, remote candidate publication/retention/consumer verification, Product cutover and native regression matrix, and final parent/two-child layout. Real OS theme changes, monitor DPI transitions, keyboard/IME/accessibility interaction, and final source-free package runtime have not been claimed as tested in this phase.
+
+## Phase 2 — Kit boundary/API, baseline and local platform validation (2026-09-06)
+
+Kit local candidate: `2715d01bb2edcb3a62890878517c946b82851352` on `codex/extraction-candidate`. Its implementation was checked at `960373bd30d350699ed29fec667cb69ab3ad77fd`, followed by a documentation-only evidence commit. The final candidate was packaged and its archive rechecked. Neither commit was pushed. Tasks remains on its embedded Kit; Product sources, Cargo manifests, Cargo.lock, existing checker and runtime behavior are unchanged in this phase.
+
+### Contracts and checks delivered
+
+- Kit now owns `scripts/check_ui_boundaries.py`, a shared standard-library lexical scanner, Cargo manifest/resolved-graph checks and positive/negative fixtures. These preserve the original guard's useful import/layer/cycle/API checks and replace its regex/line-counting blind spots. Multiline/alias declarations, comments and escaped strings, balanced delimiters, property directions/types/bindings, callback/function signatures and pure modifiers, struct fields, enums and base types are covered. Unknown public syntax fails explicitly; the Slint 1.17.1 compiled probe supplements semantic validation.
+- `scripts/kit_api_v1.json` freezes 28 exports, 217 properties, 13 callbacks and four enums, with signature and default-expression changes reported separately. The four removed Product names, Q1–Q4/timer/Focus tokens and 11 removed icon aliases are documented as the SPEC-authorized initial migration. CI never auto-refreshes this baseline.
+- Kit/Gallery import boundaries, same-layer cycles, upward/cross-layer imports, implementation/facade recursion, raw Gallery imports, Product declarations/tokens, static path escapes, asset hashes/licenses and source headers are checked. Generic FocusScope/task text and legal Gallery/internal crate paths have positive fixtures.
+- The distribution checker uses the same scanner, validates the live 32-SVG manifest and license material, requires tracked static dependencies, checks package-list inclusion and compares required bytes in the actual `.crate` archive. SVG/UI/Gallery implementation, Cargo.lock and the pinned toolchain have no diff from Phase 1.
+- The incremental verifier changes a deep token and referenced SVG separately, requires Gallery build-script reruns and changed binaries, restores exact bytes and rebuilds. Verbose logs identify both deep changed files; it requires exclusive checkout/build access.
+- New Kit CI supports push/PR/manual triggers with contents:read: Linux quality/guard/tests/Gallery/package/incremental; Windows native Gallery and screenshot smoke; macOS workspace all-targets/guard; actual Rust 1.92.0 helper+Gallery builds on Windows. This is workflow preparation, not remote CI evidence.
+- README, public API, consumer/provenance/Gallery documentation, AGENTS and `docs/VALIDATION.md` describe actual commands, explicit baseline review and remaining limitations. Future Tasks policy fixtures do not activate the final Tasks cutover guard early.
+
+### Gate 2 evidence
+
+Raw evidence is local under Kit `target/phase2/`, `target/incremental-verification/` and source-keyed visual baseline directories. Windows environment: native x86_64 MSVC, Rust/Cargo 1.94.1 and 1.92.0, Python 3.13.15. Linux environment: Ubuntu 24.04 x86_64, WSL2/WSLg, Rust/Cargo 1.94.1, Python 3.12; its target directory is separate from Windows and Tasks.
+
+| Check | Result | Evidence |
+|---|---|---|
+| Windows fmt / clippy all-targets/all-features with denied warnings / Rust tests | PASS; 5 Rust tests | `fmt.log`, `clippy.log`, `tests.log` |
+| Windows boundary/API/assets/resolved dependencies / Python tests | PASS; 31 tests | `boundaries-final.log`, `python-tests-final.log` |
+| Windows Gallery + 28-name Slint API probe | PASS | `build-final.log` |
+| Actual Rust 1.92.0 helper + Gallery build | PASS; independent MSRV target | `msrv.log` |
+| Linux fmt / clippy all-targets/all-features / Rust tests / Gallery + probe | PASS; 5 Rust tests | `linux-fmt.log`, `linux-clippy.log`, `linux-tests.log`, `linux-build.log` |
+| Linux boundary/API/assets/resolved dependencies / Python tests | PASS; 31 tests | `linux-boundaries-final.log`, `linux-python-tests-final.log` |
+| Independent local Kit Git clone with own target and no Tasks checkout | PASS: guard and Gallery build | `isolated-boundaries.log`, `isolated-build.log` |
+| Source package and archive verification | PASS: 72 files packaged, 59 required files byte-checked including 32 SVGs | `package.log`, `distribution.log`; final candidate `package-final-head.log`, `distribution-final-head.log` |
+| Deep token / referenced SVG incremental build | PASS: both rerun Gallery build script and change binary; bytes restored | `incremental-verification/result.json` and verbose build logs |
+| Windows / Linux WSLg Controls rendering smoke | PASS: Light, page 4, preview 1, 1040×800, 100%, winit-software | `capture-windows.log`, `capture-linux.log`; clean SHA/content identity in PNG manifests |
+| macOS native workspace all-targets | NOT_RUN locally; no macOS host/SDK | Mandatory prepared CI job to run in Phase 3 |
+| Actual remote CI / retained commit / Git+SHA neutral consumer | NOT_RUN; no publication performed | Phase 3 |
+
+Linux initially lacked fontconfig development files and the X11 xkbcommon runtime. Both failures were resolved using Ubuntu packages extracted into a private user-owned validation sysroot, with command-scoped pkg-config/runtime paths. Stale apt-index download 404s were resolved with a private refreshed index. No system package replacement or repository build override was committed. Both platform screenshots were reviewed; font/render differences are recorded, not asserted pixel-identical.
+
+**Gate 2 local requirements are satisfied.** Kit is independently reviewable, buildable, testable and packageable, with the intended Product-free API and licensing material. This does not mark all platform gates or the full migration complete: macOS, actual remote CI and retained Git consumption are still mandatory. Real OS theme transitions, monitor DPI transitions, keyboard/IME and complete accessibility/focus behavior remain unverified; ModalManager focus containment/restoration remains a documented P1 gap.
+
+The next phase is Phase 3 publication and same-SHA remote verification. No Tasks dependency switch, Git remote push, release tag or parent/child directory relocation occurred in Phase 2.
