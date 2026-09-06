@@ -1,0 +1,62 @@
+name: Package validation
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            platform: windows
+          - os: ubuntu-latest
+            platform: linux
+          - os: macos-latest
+            platform: macos
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@1.94.1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: native-package
+      - name: Install Linux UI dependencies
+        if: runner.os == 'Linux'
+        run: >-
+          sudo apt-get update && sudo apt-get install -y
+          libfontconfig1-dev libx11-xcb-dev libxcursor-dev
+          libxkbcommon-x11-dev libx11-dev
+      - name: Build original native package
+        shell: bash
+        run: |
+          if [ '${{ runner.os }}' = Windows ]; then
+            pwsh -NoProfile -File packaging/windows/package.ps1
+          else
+            bash packaging/${{ matrix.platform }}/package.sh
+          fi
+      - name: Verify native archive closure
+        shell: bash
+        run: |
+          for archive in target/package/${{ matrix.platform }}/*.zip target/package/${{ matrix.platform }}/*.tar.gz; do
+            if [ -f "$archive" ]; then
+              python scripts/verify_product_package.py "$archive" --platform ${{ matrix.platform }} --output target/package/${{ matrix.platform }}/verification.json
+            fi
+          done
+          test -f target/package/${{ matrix.platform }}/verification.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: native-package-${{ matrix.platform }}
+          path: |
+            target/package/${{ matrix.platform }}/*.zip
+            target/package/${{ matrix.platform }}/*.tar.gz
+            target/package/${{ matrix.platform }}/*.sha256
+            target/package/${{ matrix.platform }}/verification.json
+          if-no-files-found: error
