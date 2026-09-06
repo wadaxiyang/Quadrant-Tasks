@@ -373,3 +373,235 @@ recur in targeted runs, five exact-binary repetitions, subsequent full local
 tests or successful hosted Windows tests; preserve it for Phase 5 stress checks.
 Phase 4 acceptance is not a claim that the Phase 5 package/dual-process/native
 business matrix or Phase 6 physical workspace relocation has been completed.
+
+## Phase 5 — independent builds, packages and native regression (2026-09-06)
+
+**Gate 5: INCOMPLETE — native manual acceptance remains open.** Build, source
+independence and distribution checks pass. The observed Windows startup crash
+is fixed and stress-tested. Actual system-tray reopen/Exit and physical DPI /
+cross-monitor transitions have not been verified; notification delivery while
+the GUI is closed also remains unobserved. These are not replaced by unit tests
+or synthetic screenshots. Phase 6 has not started.
+
+The first tested implementation is `22fb670835299902e4a3c7d4fb34c0790ed11541` on
+`codex/kit-product-cutover`. Kit remains unchanged at
+`838ecfbead2d0a1966907ddd742cb6f34516d3f6`. This entry is a subsequent
+documentation-only commit; package hashes and native results refer to the
+implementation SHA, not to an untested rebuilt package.
+
+### Independent checkout and command evidence
+
+Both repositories were cloned from their actual GitHub remotes into separate
+temporary parents, each with a new, separate `CARGO_HOME`. Neither checkout had
+a sibling repository, source override, shared target directory or copied build
+cache. Tasks resolved Kit from the pinned remote Git source. The first clean
+Tasks release build used the Phase 4 commit, then the same independent checkout
+was fast-forwarded to the Phase 5 fix and rebuilt/retested. This distinction is
+retained in the logs.
+
+Private evidence paths below are relative to ignored `target/phase5`. Local
+builds used Windows 11 build 26200, Rust 1.94.1, x86_64-pc-windows-msvc. Successful
+commands in this table exited 0. Hosted jobs record their own working directory,
+toolchain and platform in the linked full logs.
+
+| Check / command | Execution directory | Result and evidence |
+|---|---|---|
+| `git -c credential.helper= clone --branch codex/kit-product-cutover --single-branch https://github.com/wadaxiyang/Quadrant-Tasks.git repo` | `C:\123\CODE\Quadrant-phase5-tasks-20260906` | Independent remote checkout; Kit resolved below this parent's new `cargo-home`, as recorded by `tasks-clean-package.log` and `tasks-clean-package-fixed.log` |
+| `git -c credential.helper= clone https://github.com/wadaxiyang/Quadrant-Kit.git repo`, checkout approved full SHA | `C:\123\CODE\Quadrant-phase5-kit-20260906` | Clean approved Kit checkout; independent `cargo-home` |
+| `cargo fmt --all --check`; `cargo clippy --workspace --all-targets --all-features --locked -- -D warnings`; `cargo test --workspace --locked` | Fresh Kit `repo` | PASS; 5 Rust tests; `kit-clean-gates.log` |
+| `python scripts/check_ui_boundaries.py`; `python -m unittest discover -s scripts/tests -p test_*.py` | Fresh Kit `repo` | PASS; 35 Python tests; `kit-clean-gates.log` |
+| `cargo build --locked -p quadrant-kit-gallery` | Fresh Kit `repo` | PASS; `kit-clean-build.log` |
+| `cargo package --locked -p quadrant-kit --list`; `cargo package --locked -p quadrant-kit` | Fresh Kit `repo` | PASS, including Cargo package verification; 72 files, public `ui/kit.slint`, assets and licenses; `kit-clean-gates.log`, `kit-crate-files.json` |
+| `pwsh -NoProfile -File packaging/windows/package.ps1` | Fresh Tasks `repo` | PASS; original entry point builds the optimized executable pair and archive; `tasks-clean-package-fixed.log` |
+| `python scripts/verify_product_package.py target/package/windows/Quadrant-0.1.1-windows-x86_64.zip --platform windows --output <evidence>/windows-clean-package-fixed.json` | Fresh Tasks `repo` | PASS; native executable signatures, licenses and archive checksum |
+| `cargo check --workspace --all-targets --locked`; `cargo test --workspace --locked` | Fresh Tasks `repo` | PASS; 126 tests, 0 failures, 1 existing notification smoke ignored; `tasks-clean-all-targets.log`, `tasks-clean-tests.log` |
+| `cargo test --locked -p quadrant-platform -p quadrant-agent`; strict platform/Agent Clippy | Original Tasks checkout | PASS; `identity-fix-tests.log`, `identity-fix-clippy.log` |
+| `python -m unittest discover -s scripts/tests -v`; `python scripts/check_ui_boundaries.py` | Original Tasks checkout and all three native CI platforms | PASS; 25 Python tests, including 7 new package fixtures; `python-package-tests.log`, `guard-identity-fix.log`, hosted logs |
+
+For runtime isolation, the fresh Tasks source and Cargo cache were subsequently
+renamed to `repo-offline` and `cargo-home-offline`, within their temporary parent.
+Their original compiled absolute paths no longer existed. The extracted release
+pair ran from `C:\123\CODE\Quadrant-phase5-runtime-20260906\package`, with an empty
+working directory and an empty runtime `CARGO_HOME`. All runtime test data used
+that parent's isolated `profile` via `QUADRANT_DATA_DIR`. See
+`build-paths-offline.json`, `runtime-binaries.json` and `native-interaction`.
+
+The local runtime ZIP SHA-256 is
+`5db8ded01f8ddff6cc4b481ee085c9e46dd5464386c3c6469bd013adc1841e65`.
+Both executables were extracted from that same archive. The verifier compares
+license bytes against the checkout that produced the archive: an initial attempt
+using the original working tree encountered its differing LICENSE line endings;
+the producer-checkout verification passed without weakening the byte comparison.
+
+### Native CI and distribution closure
+
+[Code CI 34008329629](https://github.com/wadaxiyang/Quadrant-Tasks/actions/runs/34008329629)
+passed all four jobs at exactly the implementation SHA:
+
+| Platform / job | Verified result |
+|---|---|
+| Linux, Rust 1.94.1 | fmt, strict all-targets/all-features Clippy, boundary/API/asset guard, 25 Python tests, 123 Rust tests and both native binaries |
+| Windows, Rust 1.94.1 | Agent/transport preflight, all-targets check, 126 Rust tests with 1 existing notification smoke ignored, both binaries and native three-window probes |
+| macOS, Rust 1.94.1 | Agent/transport preflight, all-targets check, 123 Rust tests, both binaries; existing short test TMPDIR retained |
+| Windows MSRV | Actual Rust 1.92.0 locked build of both binaries |
+
+[Package CI 34008329538](https://github.com/wadaxiyang/Quadrant-Tasks/actions/runs/34008329538)
+passed Windows, Linux and macOS native packaging at that same SHA. The new
+workflow invokes the original `packaging/windows/package.ps1`,
+`packaging/linux/package.sh` and `packaging/macos/package.sh`. It uploads test
+archives and verification reports; it does not publish a release. macOS remains
+explicitly unsigned.
+
+`scripts/verify_product_package.py` checks the actual archive, executable pair
+and platform format, original license bytes, checksum sidecar and platform
+resources. It rejects source/profile leakage and unsafe archive entries.
+The seven fixtures cover a complete pair and failures for a missing Agent,
+wrong binary format, altered MIT license, bad checksum, leaked source/profile
+and unsafe path. Real Linux/macOS archives additionally exercise their platform
+resource checks. This is archive verification, not a claim that those two
+platforms received the interactive Windows business regression.
+
+All three CI archives were downloaded and their hashes rechecked against both
+the reports and sidecars; each report identifies the exact implementation SHA.
+`evidence-summary.json` records their platform/toolchain and hashes;
+`code-ci-final.{json,log}`, `package-ci-final.{json,log}` and `ci-packages/` retain
+the full results. Workspace test totals exclude separately repeated preflight
+steps.
+
+### Windows concurrent startup crash: resolved
+
+The Phase 4 heap-corruption observation recurred on the fifth Phase 5 IPC stress
+round as `0xc0000005`. Native debugger reproduction captured `0xc0000374` with
+the symbolized path `SetCurrentProcessExplicitAppUserModelID -> LocalFree ->
+RtlFreeHeap`, entered by concurrent `Agent::open` calls. The fault was in repeated
+concurrent process identity initialization; no evidence implicated Kit imports
+or named-pipe shutdown.
+
+`initialize_application_identity` now caches the Windows initialization result
+in a process-wide `OnceLock`. The AUMID remains `Quadrant.Tasks`; profile, IPC,
+database and application identity values are unchanged. A fresh-child Windows
+regression synchronizes 32 threads at a barrier, each making 64 calls, including
+first-call contention. Existing tests remain parallel and enabled.
+
+After the fix, **30 complete IPC rounds passed: 360 tests, 0 failures**.
+`ipc-stress.log` preserves the original failure; `debug-symbols/ipc-debug-fault.json`
+preserves the symbolized fault; `ipc-stress-fixed.log` and
+`ipc-stress-summary.json` record the successful rerun. Final local full workspace
+tests, hosted Windows tests and packaged runtime interaction also passed.
+
+### Native Windows business observations
+
+The actual optimized package was launched with `SLINT_BACKEND=winit-software`,
+no scale override, from the empty runtime working directory described above.
+GUI input used selected native windows. Screenshot/accessibility records are in
+`native-interaction/`; process snapshots and PID records are in the evidence
+root. Interactive actions have observed outcomes rather than shell exit codes.
+
+| Spec scenario | Observed result / evidence |
+|---|---|
+| Main / companion startup away from source cwd | PASS; standalone Quick Add bootstrapped Agent, Main later connected; Main also rendered after original build source/cache paths were unavailable; `package-source-cache-offline-main` |
+| Minimize and restore | PASS; same Main window and layout restored; `main-restored-same-layout` |
+| Close to tray ON | PASS for GUI release and resident Focus: only Agent remained, reopening Main by CLI showed the same running task at 05:53; `close-to-tray-processes.json`, `focus-survives-gui-close`. Actual reminder notification delivery was not observed |
+| Close to tray OFF | PASS; settings persisted, native Close ended both GUI and Agent without a process kill; `close-to-tray-disabled`, `full-exit-processes.json` (0 remaining processes) |
+| Actual tray reopen / Exit | NOT VERIFIED; native automation could not target the Windows system tray. Manual assistance was requested but no result received. CLI reopening above is not tray-click evidence |
+| Standalone / repeated Quick Add | PASS; no forced Main, second CLI request exited 0 and activated the same window with its draft; `quick-add-repeat.log`, `quick-add-processes.json` |
+| Main and standalone Quick Add together | PASS; both displayed and interacted; Dark theme reached the existing draft window; `main-quickadd-coexist`, `quickadd-dark-draft-retained` |
+| Editor creation / release / reopen | PASS; created on demand, Escape released it, reopening discarded unsaved notes; `editor-created-dark`, `editor-unsaved-notes`, `editor-reopened-cancel-discards` |
+| Save / Cancel / Escape | PASS; Enter captured once into Inbox; Editor Save closed and updated the planned date; Quick Add Escape discarded its draft, reopened empty, Cancel released it; `quickadd-saved-inbox`, `today-planned-task`, `quickadd-reopened-empty` |
+| Failed save / disconnect | PASS; temporary write lock in the isolated database produced visible save error with draft retained; stopping only the isolated Agent produced a visible disconnected error and disabled Save; `editor-save-failed-retains-form`, `editor-disconnected-retains-form` |
+| Unconfirmed edits | PASS; after bounded reconnect attempts expired, UI instructed explicit reopen; failed Q2 change was not replayed automatically. Reopened task was still in Inbox; `reconnect-exhausted-no-replay` |
+| Business views | PASS; Inbox capture, Q2 classification, Today planning, Focus start/finish, Review session history, Completed and Restore were exercised through the real Agent. Follow-up Move actions traversed Q1, Q3 and Q4 with counts updated and the same task retained; `task-moved-q1`, `task-moved-q3`, `task-moved-q4` |
+| Light / Dark / System | PASS for observed switching/new windows, existing Quick Add draft and native date picker; `main-light`, `main-dark`, `std-datepicker-dark`, `system-theme-settings` |
+| Package static resources | PASS for visible Main/sidebar/task/date-picker icons while original source/cache paths were unavailable |
+| Data and identity | Isolated profile used the original `quadrant-rust.db` name and current IPC derivation. Identity constants and product contracts are unchanged; no real user profile was modified |
+
+An additional visual observation in the Focus view was that its right-side
+settings fields extended beyond the visible content area at the tested window
+size (`focus-started`). Commit `6db63abeb2a0ecca24762e0cc270948441ad8c38` replaces
+the forced 320px panel width with a preferred width and zero horizontal stretch,
+allowing the layout's actual minimum width to contain both input columns. No
+timer, settings, model or callback semantics changed. The native probe now
+accepts an optional third `focus` argument; Windows CI captures this view in
+both themes. Package validation also runs for Product UI changes.
+
+The corrected native Focus capture (`focus-layout-candidate/main.png`) and
+Light/Dark captures at simulated 200% / 225% (`focus-scale-*/main.png`) were
+visually inspected: all four settings fields and Save remain inside the card.
+These captures use `product_windows_probe.exe <output> <light|dark> focus` from
+the Tasks root, Windows Rust 1.94.1, winit/software, exit 0. The four scaled runs
+set `SLINT_SCALE_FACTOR=2` or `2.25`; they are not physical DPI tests.
+
+### Scaling evidence and remaining native acceptance
+
+The original Kit native smoke entry point produced an approved-SHA Controls
+capture at 1040x800 / 100%. Gallery native keyboard Tab focus and Space theme
+activation were also exercised. `kit-native-smoke.log` and `kit-native/` retain
+the deterministic capture and metadata.
+
+`python target/phase5/capture_scale_probes.py` ran eight native winit/software
+processes with `SLINT_SCALE_FACTOR=2` or `2.25`: Light/Dark Gallery plus Product
+Main, Quick Add and Task Editor. All exited 0. All **16 PNGs were visually
+inspected**, along with the original Kit smoke PNG. Captured regions have
+readable text/icons, aligned controls and coherent colors; Gallery and Editor
+use their expected scroll areas. `scale-probes/manifest.json` records commands,
+working directories, scale type, binary/image hashes and physical pixel sizes;
+`visual-review.json` records the review scope. These synthetic Product probes
+do not use Agent/IPC and are separate from the real package business tests.
+
+These are **programmatic scale simulations**, not physical display DPI evidence.
+The current Windows desktop exposes one usable 1920x1080 display
+(`display-layout.json`). Cross-screen movement could not be run. System display
+settings were not changed.
+
+To close Gate 5, use the preserved isolated package/profile and record:
+
+1. Enable Close to tray, close Main, click the actual tray icon to reopen Main,
+   then choose actual tray Exit and confirm both package processes terminate.
+   The earlier test processes have now fully exited; the previous pending
+   manual tray prompt no longer describes a running test instance.
+2. Verify a scheduled reminder while Main is released, including visible native
+   delivery. The normally ignored notification smoke was separately executed
+   with `cargo test --locked -p quadrant-platform native_windows_notification_smoke_test -- --ignored --exact notifications::tests::native_windows_notification_smoke_test`
+   from the Tasks root on Windows/Rust 1.94.1: exit 0, one test passed
+   (`notification-smoke.log`). The notification API accepted the submission;
+   no notification window was available to the native window observer. This
+   does not establish visible scheduled delivery while the GUI is closed.
+3. Use real 200% / 225% display settings and move Main, Quick Add and Editor
+   across displays; capture the display configuration and before/after views.
+
+No master merge, release publication or physical workspace relocation is part
+of this Phase 5 checkpoint.
+
+### Final implementation checkpoint
+
+Final code is `6db63abeb2a0ecca24762e0cc270948441ad8c38`; its only production
+difference from the fully exercised `22fb670` package is the Focus panel layout
+correction above. The fresh remote Tasks checkout was fast-forwarded to this
+SHA, rebuilt with the original Windows packaging entry point, and the new
+archive passed verification. The rebuilt local ZIP SHA-256 is
+`c44819185a01240a608307b08db12b560cc9243b75b24b64c78734c86fd8b095`.
+
+Both new executables were extracted together, the build checkout/cache paths
+were again made unavailable, and the actual package bootstrapped Agent from the
+empty working directory. Focus's four input fields fit within the card; clicking
+Save displayed `Pomodoro settings saved.` Closing Main with Close to tray OFF
+again ended both processes. Evidence: `tasks-clean-package-focus.log`,
+`windows-clean-package-focus.json`, `final-runtime.json`,
+`native-interaction/final-package-*` and `focus-visual-review.json`. The prior
+runtime executable pair is retained separately for diagnostic comparison.
+
+[Final package CI 34009907575](https://github.com/wadaxiyang/Quadrant-Tasks/actions/runs/34009907575)
+passed all three native platforms at this exact SHA. All three downloaded
+archives match their report and sidecar checksums; records are in
+`package-ci-focus.{json,log}`, `ci-packages-6db63ab/` and
+`final-package-downloads.json`.
+
+[Final code CI 34009907582](https://github.com/wadaxiyang/Quadrant-Tasks/actions/runs/34009907582)
+also passed all four jobs at exactly `6db63ab`: Linux quality, native Windows,
+native macOS and actual Windows Rust 1.92.0. Both native workspace test runs,
+all-targets checks, debug binaries and the additional Windows Focus captures
+completed successfully. Full results are retained in `code-ci-focus.{json,log}`
+and `ci-native-6db63ab/`. Subsequent ledger commits contain only this record.
+
+The remaining Gate 5 native manual items listed above are still open; neither
+this corrective checkpoint nor the passing package jobs marks Gate 5 complete.
