@@ -48,7 +48,7 @@ class WorkspaceBootstrapTests(unittest.TestCase):
     def test_apply_creates_only_parent_files(self):
         before = self.snapshots()
         BOOTSTRAP.bootstrap(self.root, apply=True)
-        self.assertIn(str(self.root), (self.root / "docs/WORKSPACE.md").read_text())
+        self.assertIn(str(self.root.resolve()), (self.root / "docs/WORKSPACE.md").read_text())
         self.assertNotIn("{{", (self.root / "docs/MIGRATION_STATUS.md").read_text())
         self.assertFalse((self.root / ".git").exists())
         self.assertFalse((self.root / "Cargo.toml").exists())
@@ -102,6 +102,17 @@ class WorkspaceBootstrapTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "linked coordination path"):
             BOOTSTRAP.bootstrap(self.root, apply=True)
         self.assertEqual("private", target.read_text())
+
+    def test_ancestor_alias_uses_verified_canonical_directory(self):
+        alias = self.root.parent / "alias"
+        try:
+            alias.symlink_to(self.root.parent, target_is_directory=True)
+        except OSError as error:
+            self.skipTest(f"host cannot create symbolic links: {error}")
+        result = BOOTSTRAP.bootstrap(alias / "Quadrant")
+        self.assertTrue(all(Path(item["path"]).is_relative_to(self.root.resolve())
+                            for item in result))
+        self.assertFalse((self.root / "AGENTS.md").exists())
 
 
 if __name__ == "__main__":

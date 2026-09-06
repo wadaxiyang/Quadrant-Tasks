@@ -17,8 +17,8 @@ FILES = {
 }
 
 
-def reject_links(path):
-    for item in (path, *path.parents):
+def reject_links(path, *, ancestors=True):
+    for item in ((path, *path.parents) if ancestors else (path,)):
         if item.is_symlink() or (hasattr(item, "is_junction") and item.is_junction()):
             raise ValueError(f"linked coordination path is not supported: {item}")
 
@@ -31,7 +31,9 @@ def git(root, *args):
 
 def prepare(workspace):
     workspace = Path(workspace).absolute()
-    reject_links(workspace)
+    # Canonicalize platform ancestor aliases (/var on macOS, short Windows names)
+    # before checking ownership; the chosen root itself must not be a link.
+    reject_links(workspace, ancestors=False)
     workspace = workspace.resolve(strict=True)
     for ancestor in (workspace, *workspace.parents):
         if (ancestor / ".git").exists() or (ancestor / "Cargo.toml").exists():
