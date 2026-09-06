@@ -1,6 +1,6 @@
 # Kit extraction v2 — migration ledger
 
-## Current checkpoint — Phase 7 verification (2026-09-06)
+## Current checkpoint — COMPLETE (2026-09-06)
 
 Gate 6: **PASS**. Both complete repositories now occupy the independent child
 roots `Quadrant/Quadrant-Tasks` and `Quadrant/Quadrant-Kit`. Git invariants,
@@ -9,8 +9,9 @@ builds passed after relocation; details are in the final Phase 6 entry below.
 Earlier checkpoint statements in this chronological ledger retain their
 historical scope. The user accepted the three remaining Gate 5 manual items on
 2026-09-06; Gate 5 is **PASS (user acceptance)**. Phase 7 documentation and the
-Kit-only learning exercise are implemented; final revision CI is pending.
-Overall migration remains **IN_PROGRESS** until that final verification closes.
+Kit-only learning exercise are complete. Both handoff revisions passed all four
+CI jobs each. **Gate 7: PASS. Overall migration: COMPLETE.** The final audit and
+exact CI references are at the end of this ledger; remaining P1 limits are explicit.
 
 ## Scope and source
 
@@ -857,8 +858,8 @@ separately below so the old adopted-source CI is not confused with new doc SHAs.
 | API probe compiled and interactive examples present | PASS — Gallery builds and documented coverage |
 | Scene-specific screenshot identity | PASS — capture fixtures, full manifests and phase evidence |
 | Per-window theme and std-widgets coordination | PASS — host initialization and native multi-window evidence |
-| Automatic CI guards at actual source revisions | PASS for adopted source; final handoff revision checks pending below |
-| Quality/targets/checker tests | PASS for required source; local handoff checks pass, final CI pending below |
+| Automatic CI guards at actual source revisions | PASS — adopted-source CI and both exact handoff revisions below |
+| Quality/targets/checker tests | PASS — local checks and all eight final handoff CI jobs |
 | Neutral remote consumer and no-sibling Tasks build | PASS — Phases 3 and 5 isolated remote builds |
 | Paired GUI/Agent packaging, stable data/identity | PASS — Phase 5 native packages/business tests |
 | Required native Product behavior | PASS — Phase 5 execution plus explicit user acceptance of its final three items |
@@ -867,7 +868,7 @@ separately below so the old adopted-source CI is not confused with new doc SHAs.
 | Reviewed docs tracked; private materials excluded | PASS — explicit allowlist and staged file/link audit |
 | Source/move/API/revision/results and P1 recorded | PASS — this ledger, provenance maps and current guides |
 | Kit-only Gallery learning | PASS — restored Badge exercise, native PNGs/logs |
-| No placeholder SHA, invented run or hidden P0 | PASS — exact revision records and attributed user acceptance; final CI still explicitly pending |
+| No placeholder SHA, invented run or hidden P0 | PASS — exact revision records, actual CI and attributed user acceptance |
 
 Remaining P1: complete native keyboard/IME/screen-reader and state/backend
 coverage; ModalManager focus containment/restoration and nested-modal design;
@@ -875,4 +876,29 @@ controlled cross-machine font parity for strict pixel comparisons. These are
 documented existing limits, not new migration P0. No redesign, toolchain upgrade,
 stable release or merge into default branches is included in this handoff.
 
-Gate 7 and final migration status remain **IN_PROGRESS** pending final handoff CI.
+### Final handoff verification
+
+| Repository | Exact checked handoff commit | CI | Result |
+|---|---|---|---|
+| Kit | `0dddb472a67635d6389c75eb8bc46831b6d35083` | [34014164364](https://github.com/wadaxiyang/Quadrant-Kit/actions/runs/34014164364) | PASS — Linux quality, native Windows/macOS and Rust 1.92; all four jobs |
+| Tasks | `9471e8281709a17ddb227bac7a0be2e402f749d0` | [34014250019](https://github.com/wadaxiyang/Quadrant-Tasks/actions/runs/34014250019) | PASS — Linux quality, native Windows/macOS and Rust 1.92; all four jobs |
+
+Both runs are completed/success at exactly the listed SHAs. Kit's current source
+package/archive also passed locally, including the required 59-file closure and
+32 SVGs. Its final CI Controls screenshot was downloaded and visually checked.
+Tasks' native job passed its full tests, paired build and synthetic window
+captures. Commands, job details and full logs are retained under each repository's
+ignored `target/phase7/`; the external private checkpoint preserves copies and
+complete-history bundles.
+
+All Phase 7 architecture/development/integration/learning changes are included in
+those checked commits. The subsequent acceptance-ledger-only commit records these
+results; its actual delivery SHA is reported outside that commit. This does not
+claim the acceptance commit was the source of the two earlier CI runs. Tasks'
+production Kit revision and both repositories' implementation/assets remain
+unchanged by the handoff.
+
+The SPEC 15.1 audit is **PASS**, with the final three Phase 5 manual scenarios
+closed by the user's explicit acceptance rather than a fabricated automated run.
+**Gate 7: PASS. Final migration status: COMPLETE. Outstanding P0: none.**
+The existing P1 coverage limits above remain follow-up work after extraction.
