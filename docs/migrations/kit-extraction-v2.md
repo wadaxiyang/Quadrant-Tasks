@@ -169,3 +169,52 @@ Linux initially lacked fontconfig development files and the X11 xkbcommon runtim
 **Gate 2 local requirements are satisfied.** Kit is independently reviewable, buildable, testable and packageable, with the intended Product-free API and licensing material. This does not mark all platform gates or the full migration complete: macOS, actual remote CI and retained Git consumption are still mandatory. Real OS theme transitions, monitor DPI transitions, keyboard/IME and complete accessibility/focus behavior remain unverified; ModalManager focus containment/restoration remains a documented P1 gap.
 
 The next phase is Phase 3 publication and same-SHA remote verification. No Tasks dependency switch, Git remote push, release tag or parent/child directory relocation occurred in Phase 2.
+
+## Phase 3 — Published candidate and real remote consumption (2026-09-06)
+
+**Gate 3: PASS.** The qualified, remotely available Kit commit is **`838ecfbead2d0a1966907ddd742cb6f34516d3f6`**. It has passed actual remote CI and independent Git+SHA consumer verification. This is the candidate eligible for Phase 4; Tasks has not adopted it yet.
+
+### Publication and retention
+
+- Rechecked `wadaxiyang/Quadrant-Kit`: PUBLIC, expected URL `https://github.com/wadaxiyang/Quadrant-Kit.git`, ADMIN access, initially no remote refs. Reviewed tracked source/documentation/license files and credential/machine-path indicators before publication. Only the Kit repository was pushed.
+- Added remote mode to `scripts/verify_distribution.py` and its isolated verification module/fixtures. Local boundary/package/archive checks and all 35 Python tests passed before commit and push. The consumer guide documents parameters, isolation, retained evidence and baseline/retention discipline.
+- Pushed `codex/extraction-candidate` at the full SHA above. After its CI passed, created annotated tag **`candidate/extraction-838ecfbead2d`** and pushed only that explicit tag. Its tag object is `aa736b6873652d0c8dd8ea55df6d16bb5cec9f39`; its peeled commit is the qualified SHA, not the tag object SHA.
+- Created `main` at the same verified commit and set it as the repository default branch. Existing candidate history was preserved; no force push, tag movement or stable `v0.1.0` release occurred.
+- Repository ruleset **22363188**, [Retain extraction candidate commits](https://github.com/wadaxiyang/Quadrant-Kit/rules/22363188), is active for `refs/tags/candidate/extraction-*`. Update and deletion are prohibited, there are no bypass actors, and the API reports the current user cannot bypass it. Future fixes must use new commits and new candidate tags. Retained candidate tags are not formal stable releases.
+
+### Same-SHA CI evidence
+
+Every run below has `headSha = 838ecfbead2d0a1966907ddd742cb6f34516d3f6`, status completed and conclusion success. All four jobs passed in each run.
+
+| Trigger/reference | Run | Result |
+|---|---|---|
+| Candidate branch, before retention tag creation | [34003620362](https://github.com/wadaxiyang/Quadrant-Kit/actions/runs/34003620362) | PASS |
+| Retained candidate tag | [34004051391](https://github.com/wadaxiyang/Quadrant-Kit/actions/runs/34004051391) | PASS |
+| Default `main` branch | [34004053852](https://github.com/wadaxiyang/Quadrant-Kit/actions/runs/34004053852) | PASS |
+
+Jobs cover Linux fmt/clippy/tests, boundary/API/assets/resolved graph, 35 Python fixtures, Gallery/probe, package/archive and incremental token/SVG invalidation; Windows all-targets/guard/tests/native Gallery and screenshot; macOS native workspace all-targets/guard/tests; and actual Windows Rust 1.92.0 helper+Gallery builds. The previously unrun macOS gate now has real hosted-runner evidence. The candidate-run Windows Controls PNG/manifest artifact was downloaded and visually reviewed.
+
+### Independent anonymous fetch and neutral consumer
+
+The verification command used the exact public URL, full SHA and `refs/tags/candidate/extraction-838ecfbead2d`, plus GUI smoke and a report output path. It created a fresh temporary working directory, Cargo home and target outside both project checkouts. No sibling Kit path, copied implementation, personal Cargo cache/config, URL rewrite, patch or source replacement was used. Personal/system Git configuration and credential helpers were disabled; the Kit fetch was anonymous.
+
+| Verification | Result |
+|---|---|
+| Fetch explicit retained ref, then `FETCH_HEAD^{commit}` | PASS; exactly the qualified 40-character SHA |
+| Deliberate initial consumer lockfile generation | PASS; 597 packages resolved with the declared Rust 1.92 compatibility policy |
+| Actual metadata source | `git+https://github.com/wadaxiyang/Quadrant-Kit.git?rev=838ecfbead2d0a1966907ddd742cb6f34516d3f6#838ecfbead2d0a1966907ddd742cb6f34516d3f6` |
+| Actual manifest location | Inside the new CARGO_HOME's `git/checkouts/quadrant-kit-66b2a2b03347928c/838ecfb/Cargo.toml`; canonical path checked, no sibling checkout |
+| Slint and slint-build | Exactly 1.17.1; metadata contains no Product packages |
+| `cargo build --locked` | PASS, exit 0; native Windows MSVC Rust/Cargo 1.94.1; fresh target |
+| Lockfile integrity | Unchanged by locked build; SHA-256 `d48930e4e83ad97abd5fe9742bf468a27697a5f9475ab926e45942adbb0ae2f7` |
+| Light and Dark native consumer rendering | PASS, exit 0 each; winit-software at 100%, two 640×440 PNGs visually reviewed |
+
+The generated consumer compiles Theme/ThemeMode, FluentButton, FluentIcon/FluentIcons, ModalManager/ModalKind and ToastHost/ToastKind through the file-mapped `@quadrant-kit` facade with EmbedFiles. It contains no Product crate, DTO or asset. Runtime smoke launches a copied binary from a separate directory without source/asset files. The build cache still exists elsewhere; this evidence is not described as a source-cache-deletion test or as validation of the final Tasks runtime package. Modal is compiled; complete modal interaction/accessibility is not claimed.
+
+An initial isolated attempt fetched and peeled the tag successfully but then failed to connect during Cargo's Git fetch because the existing Git-configured proxy was intentionally excluded with personal Git configuration. The failed attempt/report/logs were retained. A second **new** work/cache/target directory explicitly received that existing network proxy through HTTP_PROXY/HTTPS_PROXY, while all source rewrites and credential configuration remained disabled. It passed fetch, metadata, locked build and both runtime scenes. TLS verification was never disabled, and no local-path fallback or fake revision was used.
+
+Local Kit evidence is under ignored `target/phase3/`: the initial and successful remote reports/logs, CI JSON and full candidate-run log, Windows CI artifact, retained-ref listing and ruleset responses. The successful consumer's generated source, Cargo.lock, step logs, result and PNGs remain in its isolated directory and are copied into the private phase checkpoint. No cache, machine configuration or private raw log was added to either Git repository.
+
+### Handoff
+
+Kit `main` and `codex/extraction-candidate` point to the qualified commit; the protected annotated tag retains it. Tasks still uses its original embedded Kit/Gallery, manifests, lockfile and guard. Phase 3 changed only this Tasks ledger. No Product switch, embedded source deletion, stable release or final parent/two-child directory relocation was performed. Phase 4 can now use the actual verified Git+SHA dependency and proceed with its own controlled cutover/regression gates.
