@@ -406,7 +406,8 @@ export component FocusView inherits Rectangle {
                 }
 
                 FocusSettingsPanel {
-                    width: 320px;
+                    preferred-width: 320px;
+                    horizontal-stretch: 0;
                     tasks: root.tasks;
                     selected_task_id <=> root.selected_task_id;
                     focus_minutes <=> root.focus_minutes;

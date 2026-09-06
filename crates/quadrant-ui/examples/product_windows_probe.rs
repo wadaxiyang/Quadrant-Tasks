@@ -38,6 +38,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let main = MainWindow::new()?;
     main.set_agent_connected(true);
     main.set_application_version("Synthetic integration probe".into());
+    if std::env::args().nth(3).as_deref() == Some("focus") {
+        main.set_current_route(2);
+    }
     main.invoke_apply_theme(theme, dark);
     main.window().set_size(LogicalSize::new(1100.0, 720.0));
     let quick = QuickAddWindow::new()?;

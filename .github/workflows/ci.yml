@@ -69,6 +69,8 @@ jobs:
           foreach ($theme in @('light', 'dark')) {
             & ./target/debug/examples/product_windows_probe.exe "target/native-probe/$theme" $theme
             if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+            & ./target/debug/examples/product_windows_probe.exe "target/native-probe/focus/$theme" $theme focus
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           }
       - uses: actions/upload-artifact@v4
         if: runner.os == 'Windows'

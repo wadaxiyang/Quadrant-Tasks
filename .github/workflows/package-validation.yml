@@ -9,6 +9,7 @@ on:
       - 'scripts/verify_product_package.py'
       - 'scripts/tests/test_product_package.py'
       - 'crates/**'
+      - 'ui/**'
       - 'Cargo.toml'
       - 'Cargo.lock'
   pull_request:
@@ -18,6 +19,7 @@ on:
       - 'scripts/verify_product_package.py'
       - 'scripts/tests/test_product_package.py'
       - 'crates/**'
+      - 'ui/**'
       - 'Cargo.toml'
       - 'Cargo.lock'
 
