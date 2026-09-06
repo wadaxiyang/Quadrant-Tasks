@@ -1,13 +1,14 @@
-# Local-only project manuals and agent memory. At the repository root,
-# only README.md and the extensionless LICENSE are published.
+# Keep local manuals private; publish only explicitly reviewed repository rules.
 /docs/*
 !/docs/UI_ARCHITECTURE.md
+!/docs/WORKSPACE.md
 !/docs/migrations/
 /docs/migrations/*
 !/docs/migrations/kit-extraction-v2.md
 /AGENTS.md
 /*.md
 !/README.md
+!/AGENTS.md
 
 # Read-only legacy implementation
 /legacy/

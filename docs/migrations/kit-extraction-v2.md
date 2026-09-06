@@ -406,8 +406,8 @@ toolchain and platform in the linked full logs.
 
 | Check / command | Execution directory | Result and evidence |
 |---|---|---|
-| `git -c credential.helper= clone --branch codex/kit-product-cutover --single-branch https://github.com/wadaxiyang/Quadrant-Tasks.git repo` | `C:\123\CODE\Quadrant-phase5-tasks-20260906` | Independent remote checkout; Kit resolved below this parent's new `cargo-home`, as recorded by `tasks-clean-package.log` and `tasks-clean-package-fixed.log` |
-| `git -c credential.helper= clone https://github.com/wadaxiyang/Quadrant-Kit.git repo`, checkout approved full SHA | `C:\123\CODE\Quadrant-phase5-kit-20260906` | Clean approved Kit checkout; independent `cargo-home` |
+| `git -c credential.helper= clone --branch codex/kit-product-cutover --single-branch https://github.com/wadaxiyang/Quadrant-Tasks.git repo` | Isolated Tasks verification parent (exact private path in command logs) | Independent remote checkout; Kit resolved below this parent's new `cargo-home`, as recorded by `tasks-clean-package.log` and `tasks-clean-package-fixed.log` |
+| `git -c credential.helper= clone https://github.com/wadaxiyang/Quadrant-Kit.git repo`, checkout approved full SHA | Separate isolated Kit verification parent | Clean approved Kit checkout; independent `cargo-home` |
 | `cargo fmt --all --check`; `cargo clippy --workspace --all-targets --all-features --locked -- -D warnings`; `cargo test --workspace --locked` | Fresh Kit `repo` | PASS; 5 Rust tests; `kit-clean-gates.log` |
 | `python scripts/check_ui_boundaries.py`; `python -m unittest discover -s scripts/tests -p test_*.py` | Fresh Kit `repo` | PASS; 35 Python tests; `kit-clean-gates.log` |
 | `cargo build --locked -p quadrant-kit-gallery` | Fresh Kit `repo` | PASS; `kit-clean-build.log` |
@@ -421,7 +421,7 @@ toolchain and platform in the linked full logs.
 For runtime isolation, the fresh Tasks source and Cargo cache were subsequently
 renamed to `repo-offline` and `cargo-home-offline`, within their temporary parent.
 Their original compiled absolute paths no longer existed. The extracted release
-pair ran from `C:\123\CODE\Quadrant-phase5-runtime-20260906\package`, with an empty
+pair ran from a separate runtime parent's `package` directory, with an empty
 working directory and an empty runtime `CARGO_HOME`. All runtime test data used
 that parent's isolated `profile` via `QUADRANT_DATA_DIR`. See
 `build-paths-offline.json`, `runtime-binaries.json` and `native-interaction`.
@@ -605,3 +605,35 @@ and `ci-native-6db63ab/`. Subsequent ledger commits contain only this record.
 
 The remaining Gate 5 native manual items listed above are still open; neither
 this corrective checkpoint nor the passing package jobs marks Gate 5 complete.
+
+## Phase 6 — physical workspace preparation (2026-09-06)
+
+The user requested physical workspace organization while the recorded Phase 5
+manual items remain open. Those items are carried forward; Phase 6 is not an
+override of final migration acceptance.
+
+Added `scripts/bootstrap_workspace.py`, versioned non-active templates,
+`docs/WORKSPACE.md` and reviewed Tasks `AGENTS.md`. The bootstrap defaults to
+dry-run and only creates missing parent coordination files with exclusive file
+creation. Existing notes/settings are preserved. It validates both independent
+Git roots, rejects linked output paths and ancestor Git/Cargo workspaces, and
+does not move repositories, initialize Git or commit. The generated editor
+workspace contains relative child paths. Public migration records now use role
+labels instead of private absolute verification paths; exact paths remain in
+private command evidence.
+
+Local Windows verification: `python -m unittest discover -s scripts/tests -v`
+ran 33 tests, 32 passed and one symbolic-link fixture skipped because the host
+lacks symlink creation privilege. `python scripts/check_ui_boundaries.py` and
+`git diff --check` pass. The eight new filesystem/Git fixtures cover dry-run,
+creation without repository mutation, preservation of existing notes, missing
+repositories, forbidden ancestors, conflicting output directories/parents and
+linked output rejection. Native Unix CI supplies the symlink-capable execution.
+
+The pre-move checkpoint records each repository's HEAD, branch, remotes, tags,
+history, Git metadata form and status, plus target conflicts, available space
+and observed running binaries. Both are ordinary checkouts with `.git`
+directories. Full-repository movement will run from their external parent;
+an active-session lock must produce `LAYOUT_PENDING`, not a forced copy or
+reinitialized repository. Final movement/build results are recorded separately
+after execution; preparation alone does not establish Gate 6.
