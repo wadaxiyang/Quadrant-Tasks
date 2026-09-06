@@ -96,6 +96,13 @@ class ImportFixtures(unittest.TestCase):
         with self.assertRaises(ContractError):
             check_ui(self.root,self.ref)
 
+    def test_import_cannot_hide_source_in_an_excluded_directory(self):
+        for directory in ('target','.tmp-copy','__pycache__'):
+            self.write(f'ui/{directory}/copy.slint','export component Hidden {}')
+            self.write('ui/bad.slint',f'import {{ Hidden }} from "{directory}/copy.slint";')
+            with self.subTest(directory=directory), self.assertRaisesRegex(ContractError,'excluded build/temp'):
+                check_ui(self.root,self.ref)
+
     def test_existing_outside_resource_and_missing_attribution(self):
         self.write('outside.svg','<svg/>',header=False)
         self.write('ui/bad.slint','component X { in property <image> icon: @image-url("../outside.svg"); }')

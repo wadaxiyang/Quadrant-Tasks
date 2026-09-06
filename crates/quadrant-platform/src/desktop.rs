@@ -16,7 +16,14 @@ impl DesktopIntegration {
     ///
     /// Returns a platform error when the integration thread cannot be created or initialized.
     pub fn start(sink: DesktopEventSink) -> Result<Self, PlatformIntegrationError> {
-        start_integration(sink)
+        #[cfg(target_os = "windows")]
+        {
+            start_integration(sink)
+        }
+        #[cfg(not(target_os = "windows"))]
+        {
+            Ok(start_integration(sink))
+        }
     }
 
     /// Returns the capabilities that initialized successfully.
@@ -26,9 +33,9 @@ impl DesktopIntegration {
     }
 
     /// Stops platform event registration and joins its event thread.
-    pub fn shutdown(mut self) {
+    pub fn shutdown(self) {
         #[cfg(target_os = "windows")]
-        if let Some(inner) = self.inner.take() {
+        if let Some(inner) = self.inner {
             inner.shutdown();
         }
     }
@@ -46,12 +53,10 @@ fn start_integration(
 }
 
 #[cfg(not(target_os = "windows"))]
-fn start_integration(
-    _sink: DesktopEventSink,
-) -> Result<DesktopIntegration, PlatformIntegrationError> {
-    Ok(DesktopIntegration {
+fn start_integration(_sink: DesktopEventSink) -> DesktopIntegration {
+    DesktopIntegration {
         capabilities: PlatformCapabilities::default(),
-    })
+    }
 }
 
 impl std::fmt::Debug for DesktopIntegration {

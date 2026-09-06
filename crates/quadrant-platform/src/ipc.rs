@@ -21,6 +21,13 @@ pub struct AgentStream(Stream);
 impl AgentStream {
     /// Drains final server messages within a bounded deadline, then closes.
     /// Client endpoints close immediately; EOF also releases the GUI session.
+    #[cfg_attr(
+        not(target_os = "windows"),
+        expect(
+            clippy::unused_async,
+            reason = "Portable API awaits native drain on Windows"
+        )
+    )]
     pub async fn close(self) {
         #[cfg(target_os = "windows")]
         windows::drain(&self.0).await;

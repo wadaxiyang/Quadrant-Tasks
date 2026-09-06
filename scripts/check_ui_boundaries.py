@@ -132,6 +132,8 @@ def check_ui(root, reference):
                     raise ContractError(f'Unknown Kit public name: {path}')
                 continue
             target = local_path(path, source, root / 'ui')
+            if any(part in EXCLUDED or part.startswith('.tmp-') for part in target.relative_to(root).parts):
+                raise ContractError(f'Product import targets excluded build/temp source: {target}')
             if target.suffix != '.slint':
                 raise ContractError(f'Invalid Product import: {path}: {source}')
             if path.is_relative_to(root / 'ui/product') and not target.is_relative_to(root / 'ui/product'):

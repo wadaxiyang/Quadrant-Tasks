@@ -1,6 +1,8 @@
 //! Native desktop notification delivery.
 
-use quadrant_application::{ReminderAlert, ReminderDelivery, ReminderDeliveryError, UtcTimestamp};
+#[cfg(any(target_os = "windows", test))]
+use quadrant_application::UtcTimestamp;
+use quadrant_application::{ReminderAlert, ReminderDelivery, ReminderDeliveryError};
 
 /// Platform implementation of the application reminder-delivery port.
 #[derive(Clone, Copy, Debug, Default)]
@@ -80,11 +82,13 @@ fn deliver_notification(_alert: &ReminderAlert) -> Result<(), ReminderDeliveryEr
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
+#[cfg(any(target_os = "windows", test))]
 struct NotificationContent {
     title: String,
     body: String,
 }
 
+#[cfg(any(target_os = "windows", test))]
 impl NotificationContent {
     fn from_alert(alert: &ReminderAlert) -> Self {
         Self {
@@ -97,6 +101,7 @@ impl NotificationContent {
     }
 }
 
+#[cfg(any(target_os = "windows", test))]
 fn format_utc_timestamp(timestamp: UtcTimestamp) -> String {
     jiff::Timestamp::from_second(timestamp.unix_seconds())
         .map_or_else(|_| "scheduled now".to_owned(), |value| value.to_string())
@@ -104,9 +109,13 @@ fn format_utc_timestamp(timestamp: UtcTimestamp) -> String {
 
 #[cfg(test)]
 mod tests {
-    use quadrant_application::{ReminderAlert, ReminderDelivery, TaskId, UtcTimestamp};
+    #[cfg(target_os = "windows")]
+    use quadrant_application::ReminderDelivery;
+    use quadrant_application::{ReminderAlert, TaskId, UtcTimestamp};
 
-    use super::{NotificationContent, PlatformNotificationDelivery};
+    use super::NotificationContent;
+    #[cfg(target_os = "windows")]
+    use super::PlatformNotificationDelivery;
 
     #[test]
     fn reminder_notification_content_is_stable_and_task_focused() {

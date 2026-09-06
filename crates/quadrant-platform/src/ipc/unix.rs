@@ -59,7 +59,7 @@ pub(super) fn bind(endpoint: &AgentEndpoint) -> io::Result<Listener> {
     // Remove only a stale socket owned by this user, never a symlink/regular file.
     match fs::symlink_metadata(&socket) {
         Ok(metadata) if metadata.file_type().is_socket() && metadata.uid() == effective_uid() => {
-            fs::remove_file(&socket)?
+            fs::remove_file(&socket)?;
         }
         Ok(_) => {
             return Err(io::Error::new(

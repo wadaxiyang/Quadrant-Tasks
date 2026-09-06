@@ -295,3 +295,19 @@ Local locked debug and optimized release builds of both quadrant-agent and
 quadrant-app also pass, along with the final all-targets check. Packaging scripts
 pass PowerShell parsing and native shell syntax checks using their committed
 bytes. This verifies packaging entry points, not Phase 5 package execution.
+
+### Strict platform lint corrections
+
+Linux CI exposed seven pre-existing non-Windows lint errors in quadrant-platform.
+The narrow corrections remove unnecessary mutability/result wrapping in private
+fallback code, compile Windows notification helpers only on Windows or in their
+tests, and add the missing Unix cleanup semicolon. AgentStream::close keeps its
+portable async signature: Windows awaits a native drain, so only that method has
+a reasoned non-Windows unused_async expectation. No global lint is disabled and
+no business behavior or public signature changes. Windows Platform/Agent tests
+pass after the corrections. Linux all-workspace/all-targets/all-features Clippy
+with -D warnings also passes locally using the existing private Phase 2 SDK.
+
+Review also closed an import-scanner exclusion gap: Product imports cannot point
+into target, __pycache__ or .tmp-* directories. The regression fixture confirms
+that such sources cannot evade scanning. All **18 Python tests pass**.
