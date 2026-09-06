@@ -1,6 +1,15 @@
 Quadrant Third-Party Notices
 ============================
 
+Quadrant-Kit
+------------
+Shared Slint controls and their embedded generic icons are supplied by
+https://github.com/wadaxiyang/Quadrant-Kit.git at commit
+838ecfbead2d0a1966907ddd742cb6f34516d3f6.
+Retained source tag: candidate/extraction-838ecfbead2d.
+License: GPL-3.0-only for handwritten UI/helper sources; MIT for Microsoft icons.
+Kit is a build dependency; generated Slint types belong to this application.
+
 wsl-dashboard
 -------------
 Quadrant's Slint theme, constants, common controls, sidebar, title bar, and
@@ -19,7 +28,8 @@ https://github.com/microsoft/fluentui-system-icons at commit
 
 Copyright (c) 2020 Microsoft Corporation
 License: MIT
-The upstream MIT text is included at assets/icons/LICENSE-MIT in source form.
+The upstream MIT text is included at assets/icons/LICENSE-MIT in source form
+and as LICENSE-Fluent-Icons.txt beside the other packaged license notices.
 
 Quadrant itself is distributed under GPL-3.0-only. Corresponding source is
-available from https://github.com/wadaxiyang/Quadrant.
+available from https://github.com/wadaxiyang/Quadrant-Tasks.

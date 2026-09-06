@@ -1,6 +1,7 @@
 # Local-only project manuals and agent memory. At the repository root,
 # only README.md and the extensionless LICENSE are published.
 /docs/*
+!/docs/UI_ARCHITECTURE.md
 !/docs/migrations/
 /docs/migrations/*
 !/docs/migrations/kit-extraction-v2.md
@@ -17,6 +18,7 @@
 # Rust build output
 /target/
 **/*.rs.bk
+__pycache__/
 
 # Local tooling and editor state
 /.vs/

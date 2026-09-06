@@ -26,15 +26,21 @@ permissions:
 jobs:
   verify-version:
     runs-on: ubuntu-latest
+    outputs:
+      source_sha: ${{ steps.source.outputs.sha }}
     steps:
       - uses: actions/checkout@v7
         with:
           ref: ${{ env.SOURCE_REF }}
-      - name: Match tag to Cargo version
+          fetch-depth: 0
+      - name: Match existing tag to selected source and Cargo version
+        id: source
         shell: bash
         run: |
           version=$(awk -F'"' '/^version = "/ { print $2; exit }' Cargo.toml)
           test "v$version" = "$RELEASE_TAG"
+          test "$(git rev-parse HEAD)" = "$(git rev-parse --verify "refs/tags/$RELEASE_TAG^{commit}")"
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
   windows:
     needs: verify-version
@@ -42,9 +48,14 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
-          ref: ${{ env.SOURCE_REF }}
-      - uses: dtolnay/rust-toolchain@stable
+          ref: ${{ needs.verify-version.outputs.source_sha }}
+      - uses: dtolnay/rust-toolchain@1.94.1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
       - uses: Swatinem/rust-cache@v2
+      - run: python -m unittest discover -s scripts/tests -v
+      - run: python scripts/check_ui_boundaries.py
       - name: Build Windows portable release
         shell: pwsh
         run: ./packaging/windows/package.ps1
@@ -62,9 +73,14 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
-          ref: ${{ env.SOURCE_REF }}
-      - uses: dtolnay/rust-toolchain@stable
+          ref: ${{ needs.verify-version.outputs.source_sha }}
+      - uses: dtolnay/rust-toolchain@1.94.1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
       - uses: Swatinem/rust-cache@v2
+      - run: python -m unittest discover -s scripts/tests -v
+      - run: python scripts/check_ui_boundaries.py
       - name: Install Linux UI dependencies
         run: >-
           sudo apt-get update && sudo apt-get install -y
@@ -86,9 +102,14 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
-          ref: ${{ env.SOURCE_REF }}
-      - uses: dtolnay/rust-toolchain@stable
+          ref: ${{ needs.verify-version.outputs.source_sha }}
+      - uses: dtolnay/rust-toolchain@1.94.1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
       - uses: Swatinem/rust-cache@v2
+      - run: python -m unittest discover -s scripts/tests -v
+      - run: python scripts/check_ui_boundaries.py
       - name: Build unsigned macOS app bundle
         run: bash packaging/macos/package.sh
       - uses: actions/upload-artifact@v4

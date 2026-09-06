@@ -1,0 +1,13 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 owu <wqh@live.com>
+// SPDX-FileCopyrightText: Copyright (c) 2026 Quadrant contributors
+// SPDX-License-Identifier: GPL-3.0-only
+
+// Derived from wsl-dashboard at 948589a255a4bd8a3ff9c3de49e2e13109378fcd;
+// extracted from the original Quadrant theme/constants without changing values.
+import { Theme } from "@quadrant-kit";
+export global QuadrantTheme {
+    out property <color> q1_accent: Theme.dark_mode ? #ff8a7a : #c42b1c;
+    out property <color> q2_accent: Theme.dark_mode ? #7db6f4 : #0067c0;
+    out property <color> q3_accent: Theme.dark_mode ? #f5c56b : #a15c00;
+    out property <color> q4_accent: Theme.dark_mode ? #8fd6a6 : #107c10;
+}

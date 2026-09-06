@@ -1,0 +1,13 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 Quadrant contributors
+// SPDX-License-Identifier: GPL-3.0-only
+
+// Presentation-only data. Product adapters map application projections into
+// this Product-owned type; it carries no domain or repository implementation.
+export struct InboxItem {
+    id: string,
+    title: string,
+    supporting_text: string,
+    completed: bool,
+    selected: bool,
+    disabled: bool,
+}

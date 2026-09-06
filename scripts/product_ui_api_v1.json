@@ -1,0 +1,2956 @@
+{
+  "schema_version": 1,
+  "pre_cutover_commit": "d2b423d4b7f557116f6fe655dcc67aac60db2d7f",
+  "exports": {
+    "AboutView": {
+      "signature": {
+        "kind": "component",
+        "inherits": "Rectangle",
+        "members": {
+          "application-version": {
+            "kind": "property",
+            "direction": "in",
+            "type": "string"
+          },
+          "can-open-releases": {
+            "kind": "property",
+            "direction": "in",
+            "type": "bool"
+          },
+          "show-notices": {
+            "kind": "callback",
+            "arguments": [],
+            "return": "void",
+            "pure": false
+          },
+          "open-releases": {
+            "kind": "callback",
+            "arguments": [],
+            "return": "void",
+            "pure": false
+          }
+        }
+      },
+      "defaults": {
+        "application-version": {
+          "binding": ":",
+          "expression": "\"0.1.0\""
+        },
+        "can-open-releases": {
+          "binding": ":",
+          "expression": "true"
+        }
+      }
+    },
+    "Branding": {
+      "signature": {
+        "kind": "global",
+        "inherits": null,
+        "members": {
+          "app-mark": {
+            "kind": "property",
+            "direction": "out",
+            "type": "image"
+          }
+        }
+      },
+      "defaults": {
+        "app-mark": {
+          "binding": ":",
+          "expression": "@ image-url ( \"../../assets/branding/quadrant-mark.svg\" )"
+        }
+      }
+    },
+    "CompletedTaskRow": {
+      "signature": {
+        "kind": "struct",
+        "inherits": null,
+        "fields": [
+          {
+            "name": "id",
+            "type": "string"
+          },
+          {
+            "name": "metadata",
+            "type": "string"
+          },
+          {
+            "name": "title",
+            "type": "string"
+          }
+        ]
+      },
+      "defaults": {}
+    },
+    "CompletedView": {
+      "signature": {
+        "kind": "component",
+        "inherits": "Rectangle",
+        "members": {
+          "tasks": {
+            "kind": "property",
+            "direction": "in",
+            "type": "[ CompletedTaskRow ]"
+          },
+          "has-more": {
+            "kind": "property",
+            "direction": "in",
+            "type": "bool"
+          },
+          "reopen-requested": {
+            "kind": "callback",
+            "arguments": [
+              "string"
+            ],
+            "return": "void",
+            "pure": false
+          },
+          "delete-requested": {
+            "kind": "callback",
+            "arguments": [
+              "string"
+            ],
+            "return": "void",
+            "pure": false
+          },
+          "load-more-requested": {
+            "kind": "callback",
+            "arguments": [],
+            "return": "void",
+            "pure": false
+          }
+        }
+      },
+      "defaults": {
+        "tasks": {
+          "binding": null,
+          "expression": ""
+        },
+        "has-more": {
+          "binding": ":",
+          "expression": "false"
+        }
+      }
+    },
+    "FocusTaskRow": {
+      "signature": {
+        "kind": "struct",
+        "inherits": null,
+        "fields": [
+          {
+            "name": "id",
+            "type": "string"
+          },
+          {
+            "name": "metadata",
+            "type": "string"
+          },
+          {
+            "name": "title",
+            "type": "string"
+          }
+        ]
+      },
+      "defaults": {}
+    },
+    "FocusView": {
+      "signature": {
+        "kind": "component",
+        "inherits": "Rectangle",
+        "members": {
+          "tasks": {
+            "kind": "property",
+            "direction": "in",
+            "type": "[ FocusTaskRow ]"
+          },
+          "selected-task-id": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "string"
+          },
+          "selected-mode": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "int"
+          },
+          "selected-kind": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "int"
+          },
+          "session-status": {
+            "kind": "property",
+            "direction": "in",
+            "type": "int"
+          },
+          "timer-text": {
+            "kind": "property",
+            "direction": "in",
+            "type": "string"
+          },
+          "timer-progress": {
+            "kind": "property",
+            "direction": "in",
+            "type": "float"
+          },
+          "session-label": {
+            "kind": "property",
+            "direction": "in",
+            "type": "string"
+          },
+          "today-summary": {
+            "kind": "property",
+            "direction": "in",
+            "type": "string"
+          },
+          "focus-minutes": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "string"
+          },
+          "short-break-minutes": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "string"
+          },
+          "long-break-minutes": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "string"
+          },
+          "long-break-interval": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "string"
+          },
+          "auto-start-break": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "bool"
+          },
+          "auto-start-focus": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "bool"
+          },
+          "start-requested": {
+            "kind": "callback",
+            "arguments": [
+              "int",
+              "int",
+              "string"
+            ],
+            "return": "void",
+            "pure": false
+          },
+          "pause-requested": {
+            "kind": "callback",
+            "arguments": [],
+            "return": "void",
+            "pure": false
+          },
+          "resume-requested": {
+            "kind": "callback",
+            "arguments": [],
+            "return": "void",
+            "pure": false
+          },
+          "finish-requested": {
+            "kind": "callback",
+            "arguments": [],
+            "return": "void",
+            "pure": false
+          },
+          "cancel-requested": {
+            "kind": "callback",
+            "arguments": [],
+            "return": "void",
+            "pure": false
+          },
+          "settings-changed": {
+            "kind": "callback",
+            "arguments": [
+              "string",
+              "string",
+              "string",
+              "string",
+              "bool",
+              "bool"
+            ],
+            "return": "void",
+            "pure": false
+          }
+        }
+      },
+      "defaults": {
+        "tasks": {
+          "binding": null,
+          "expression": ""
+        },
+        "selected-task-id": {
+          "binding": null,
+          "expression": ""
+        },
+        "selected-mode": {
+          "binding": ":",
+          "expression": "1"
+        },
+        "selected-kind": {
+          "binding": ":",
+          "expression": "0"
+        },
+        "session-status": {
+          "binding": ":",
+          "expression": "- 1"
+        },
+        "timer-text": {
+          "binding": ":",
+          "expression": "\"25:00\""
+        },
+        "timer-progress": {
+          "binding": ":",
+          "expression": "0"
+        },
+        "session-label": {
+          "binding": ":",
+          "expression": "\"Ready to focus\""
+        },
+        "today-summary": {
+          "binding": ":",
+          "expression": "\"No productive focus completed today\""
+        },
+        "focus-minutes": {
+          "binding": ":",
+          "expression": "\"25\""
+        },
+        "short-break-minutes": {
+          "binding": ":",
+          "expression": "\"5\""
+        },
+        "long-break-minutes": {
+          "binding": ":",
+          "expression": "\"15\""
+        },
+        "long-break-interval": {
+          "binding": ":",
+          "expression": "\"4\""
+        },
+        "auto-start-break": {
+          "binding": ":",
+          "expression": "false"
+        },
+        "auto-start-focus": {
+          "binding": ":",
+          "expression": "false"
+        }
+      }
+    },
+    "InboxItem": {
+      "signature": {
+        "kind": "struct",
+        "inherits": null,
+        "fields": [
+          {
+            "name": "completed",
+            "type": "bool"
+          },
+          {
+            "name": "disabled",
+            "type": "bool"
+          },
+          {
+            "name": "id",
+            "type": "string"
+          },
+          {
+            "name": "selected",
+            "type": "bool"
+          },
+          {
+            "name": "supporting-text",
+            "type": "string"
+          },
+          {
+            "name": "title",
+            "type": "string"
+          }
+        ]
+      },
+      "defaults": {}
+    },
+    "InboxPane": {
+      "signature": {
+        "kind": "component",
+        "inherits": "SurfaceCard",
+        "members": {
+          "items": {
+            "kind": "property",
+            "direction": "in",
+            "type": "[ InboxItem ]"
+          },
+          "title": {
+            "kind": "property",
+            "direction": "in",
+            "type": "string"
+          },
+          "description": {
+            "kind": "property",
+            "direction": "in",
+            "type": "string"
+          },
+          "accent": {
+            "kind": "property",
+            "direction": "in",
+            "type": "color"
+          },
+          "destination": {
+            "kind": "property",
+            "direction": "in",
+            "type": "int"
+          },
+          "loading": {
+            "kind": "property",
+            "direction": "in",
+            "type": "bool"
+          },
+          "interaction-enabled": {
+            "kind": "property",
+            "direction": "in",
+            "type": "bool"
+          },
+          "show-add-action": {
+            "kind": "property",
+            "direction": "in",
+            "type": "bool"
+          },
+          "content-sized": {
+            "kind": "property",
+            "direction": "in",
+            "type": "bool"
+          },
+          "empty-title": {
+            "kind": "property",
+            "direction": "in",
+            "type": "string"
+          },
+          "empty-message": {
+            "kind": "property",
+            "direction": "in",
+            "type": "string"
+          },
+          "preview-hovered-item-id": {
+            "kind": "property",
+            "direction": "in",
+            "type": "string"
+          },
+          "preview-focused-item-id": {
+            "kind": "property",
+            "direction": "in",
+            "type": "string"
+          },
+          "add-requested": {
+            "kind": "callback",
+            "arguments": [],
+            "return": "void",
+            "pure": false
+          },
+          "item-opened": {
+            "kind": "callback",
+            "arguments": [
+              "string"
+            ],
+            "return": "void",
+            "pure": false
+          },
+          "item-completed": {
+            "kind": "callback",
+            "arguments": [
+              "string"
+            ],
+            "return": "void",
+            "pure": false
+          },
+          "item-move-requested": {
+            "kind": "callback",
+            "arguments": [
+              "string",
+              "int"
+            ],
+            "return": "void",
+            "pure": false
+          },
+          "item-reorder-requested": {
+            "kind": "callback",
+            "arguments": [
+              "string",
+              "int"
+            ],
+            "return": "void",
+            "pure": false
+          },
+          "item-delete-requested": {
+            "kind": "callback",
+            "arguments": [
+              "string"
+            ],
+            "return": "void",
+            "pure": false
+          }
+        }
+      },
+      "defaults": {
+        "items": {
+          "binding": null,
+          "expression": ""
+        },
+        "title": {
+          "binding": ":",
+          "expression": "\"Inbox\""
+        },
+        "description": {
+          "binding": ":",
+          "expression": "\"Unclassified captures\""
+        },
+        "accent": {
+          "binding": ":",
+          "expression": "Theme . accent"
+        },
+        "destination": {
+          "binding": ":",
+          "expression": "0"
+        },
+        "loading": {
+          "binding": ":",
+          "expression": "false"
+        },
+        "interaction-enabled": {
+          "binding": ":",
+          "expression": "true"
+        },
+        "show-add-action": {
+          "binding": ":",
+          "expression": "true"
+        },
+        "content-sized": {
+          "binding": ":",
+          "expression": "true"
+        },
+        "empty-title": {
+          "binding": ":",
+          "expression": "\"Inbox is empty\""
+        },
+        "empty-message": {
+          "binding": ":",
+          "expression": "\"Capture a task, then classify it when you are ready.\""
+        },
+        "preview-hovered-item-id": {
+          "binding": null,
+          "expression": ""
+        },
+        "preview-focused-item-id": {
+          "binding": null,
+          "expression": ""
+        }
+      }
+    },
+    "MainWindow": {
+      "signature": {
+        "kind": "component",
+        "inherits": "Window",
+        "members": {
+          "dispatch-client-update": {
+            "kind": "callback",
+            "arguments": [],
+            "return": "void",
+            "pure": false
+          },
+          "ui-font-family": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "string"
+          },
+          "agent-connected": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "bool"
+          },
+          "command-pending": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "bool"
+          },
+          "connection-message": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "string"
+          },
+          "current-route": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "int"
+          },
+          "sidebar-user-collapsed": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "bool"
+          },
+          "sidebar-auto-collapsed": {
+            "kind": "property",
+            "direction": "out",
+            "type": "bool"
+          },
+          "toast-visible": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "bool"
+          },
+          "toast-message": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "string"
+          },
+          "toast-kind": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "ToastKind"
+          },
+          "dialog-visible": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "bool"
+          },
+          "dialog-title": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "string"
+          },
+          "dialog-message": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "string"
+          },
+          "inbox-tasks": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "[ InboxItem ]"
+          },
+          "q1-tasks": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "[ TaskRow ]"
+          },
+          "q2-tasks": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "[ TaskRow ]"
+          },
+          "q3-tasks": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "[ TaskRow ]"
+          },
+          "q4-tasks": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "[ TaskRow ]"
+          },
+          "overdue-tasks": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "[ TodayTaskRow ]"
+          },
+          "planned-today-tasks": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "[ TodayTaskRow ]"
+          },
+          "due-today-tasks": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "[ TodayTaskRow ]"
+          },
+          "needs-reschedule-tasks": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "[ TodayTaskRow ]"
+          },
+          "today-task-count": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "int"
+          },
+          "focus-tasks": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "[ FocusTaskRow ]"
+          },
+          "focus-selected-task-id": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "string"
+          },
+          "focus-selected-mode": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "int"
+          },
+          "focus-selected-kind": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "int"
+          },
+          "focus-session-status": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "int"
+          },
+          "focus-timer-text": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "string"
+          },
+          "focus-timer-progress": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "float"
+          },
+          "focus-session-label": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "string"
+          },
+          "focus-today-summary": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "string"
+          },
+          "focus-minutes": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "string"
+          },
+          "short-break-minutes": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "string"
+          },
+          "long-break-minutes": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "string"
+          },
+          "long-break-interval": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "string"
+          },
+          "auto-start-break": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "bool"
+          },
+          "auto-start-focus": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "bool"
+          },
+          "review-range": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "int"
+          },
+          "review-completed-value": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "string"
+          },
+          "review-completed-hint": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "string"
+          },
+          "review-focus-value": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "string"
+          },
+          "review-focus-hint": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "string"
+          },
+          "review-sessions-value": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "string"
+          },
+          "review-sessions-hint": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "string"
+          },
+          "review-average-value": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "string"
+          },
+          "review-state-summary": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "string"
+          },
+          "review-activity": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "[ ReviewActivityRow ]"
+          },
+          "review-activity-completed-max": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "int"
+          },
+          "review-activity-focus-max": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "int"
+          },
+          "review-quadrants": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "[ ReviewQuadrantRow ]"
+          },
+          "review-quadrant-completed-max": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "int"
+          },
+          "review-quadrant-focus-max": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "int"
+          },
+          "review-longest-focus": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "string"
+          },
+          "review-top-task": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "string"
+          },
+          "review-top-task-detail": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "string"
+          },
+          "review-top-quadrant": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "string"
+          },
+          "review-recent": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "[ ReviewRecentRow ]"
+          },
+          "completed-tasks": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "[ CompletedTaskRow ]"
+          },
+          "completed-has-more": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "bool"
+          },
+          "application-version": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "string"
+          },
+          "backup-directory": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "string"
+          },
+          "latest-backup": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "string"
+          },
+          "restore-pending": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "bool"
+          },
+          "update-description": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "string"
+          },
+          "can-open-releases": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "bool"
+          },
+          "launch-at-startup": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "bool"
+          },
+          "start-hidden": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "bool"
+          },
+          "close-to-tray": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "bool"
+          },
+          "minimize-to-tray": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "bool"
+          },
+          "autostart-supported": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "bool"
+          },
+          "tray-supported": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "bool"
+          },
+          "global-hotkey-available": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "bool"
+          },
+          "native-notifications-available": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "bool"
+          },
+          "single-instance-available": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "bool"
+          },
+          "navigation-requested": {
+            "kind": "callback",
+            "arguments": [
+              "int"
+            ],
+            "return": "void",
+            "pure": false
+          },
+          "quick-add-requested": {
+            "kind": "callback",
+            "arguments": [],
+            "return": "void",
+            "pure": false
+          },
+          "theme-selected": {
+            "kind": "callback",
+            "arguments": [
+              "ThemeMode"
+            ],
+            "return": "void",
+            "pure": false
+          },
+          "desktop-settings-changed": {
+            "kind": "callback",
+            "arguments": [
+              "bool",
+              "bool",
+              "bool",
+              "bool"
+            ],
+            "return": "void",
+            "pure": false
+          },
+          "task-move-requested": {
+            "kind": "callback",
+            "arguments": [
+              "string",
+              "int"
+            ],
+            "return": "void",
+            "pure": false
+          },
+          "task-edit-requested": {
+            "kind": "callback",
+            "arguments": [
+              "string"
+            ],
+            "return": "void",
+            "pure": false
+          },
+          "task-reorder-requested": {
+            "kind": "callback",
+            "arguments": [
+              "string",
+              "int"
+            ],
+            "return": "void",
+            "pure": false
+          },
+          "task-complete-requested": {
+            "kind": "callback",
+            "arguments": [
+              "string"
+            ],
+            "return": "void",
+            "pure": false
+          },
+          "task-delete-confirmed": {
+            "kind": "callback",
+            "arguments": [
+              "string"
+            ],
+            "return": "void",
+            "pure": false
+          },
+          "focus-start-requested": {
+            "kind": "callback",
+            "arguments": [
+              "int",
+              "int",
+              "string"
+            ],
+            "return": "void",
+            "pure": false
+          },
+          "focus-pause-requested": {
+            "kind": "callback",
+            "arguments": [],
+            "return": "void",
+            "pure": false
+          },
+          "focus-resume-requested": {
+            "kind": "callback",
+            "arguments": [],
+            "return": "void",
+            "pure": false
+          },
+          "focus-finish-requested": {
+            "kind": "callback",
+            "arguments": [],
+            "return": "void",
+            "pure": false
+          },
+          "focus-cancel-requested": {
+            "kind": "callback",
+            "arguments": [],
+            "return": "void",
+            "pure": false
+          },
+          "focus-settings-changed": {
+            "kind": "callback",
+            "arguments": [
+              "string",
+              "string",
+              "string",
+              "string",
+              "bool",
+              "bool"
+            ],
+            "return": "void",
+            "pure": false
+          },
+          "review-range-selected": {
+            "kind": "callback",
+            "arguments": [
+              "int"
+            ],
+            "return": "void",
+            "pure": false
+          },
+          "completed-reopen-requested": {
+            "kind": "callback",
+            "arguments": [
+              "string"
+            ],
+            "return": "void",
+            "pure": false
+          },
+          "completed-load-more-requested": {
+            "kind": "callback",
+            "arguments": [],
+            "return": "void",
+            "pure": false
+          },
+          "create-backup-requested": {
+            "kind": "callback",
+            "arguments": [],
+            "return": "void",
+            "pure": false
+          },
+          "open-backup-directory-requested": {
+            "kind": "callback",
+            "arguments": [],
+            "return": "void",
+            "pure": false
+          },
+          "backup-restore-confirmed": {
+            "kind": "callback",
+            "arguments": [],
+            "return": "void",
+            "pure": false
+          },
+          "open-release-page-requested": {
+            "kind": "callback",
+            "arguments": [],
+            "return": "void",
+            "pure": false
+          },
+          "window-close": {
+            "kind": "callback",
+            "arguments": [],
+            "return": "void",
+            "pure": false
+          },
+          "window-minimize": {
+            "kind": "callback",
+            "arguments": [],
+            "return": "void",
+            "pure": false
+          },
+          "window-maximize": {
+            "kind": "callback",
+            "arguments": [],
+            "return": "void",
+            "pure": false
+          },
+          "window-drag-delta": {
+            "kind": "callback",
+            "arguments": [
+              "float",
+              "float"
+            ],
+            "return": "void",
+            "pure": false
+          },
+          "show-toast": {
+            "kind": "function",
+            "arguments": [
+              {
+                "name": "message",
+                "type": "string"
+              },
+              {
+                "name": "kind",
+                "type": "ToastKind"
+              }
+            ],
+            "return": "void",
+            "pure": false
+          },
+          "apply-theme": {
+            "kind": "function",
+            "arguments": [
+              {
+                "name": "mode",
+                "type": "ThemeMode"
+              },
+              {
+                "name": "system-dark",
+                "type": "bool"
+              }
+            ],
+            "return": "void",
+            "pure": false
+          }
+        }
+      },
+      "defaults": {
+        "ui-font-family": {
+          "binding": "<=>",
+          "expression": "Theme . ui-font-family"
+        },
+        "agent-connected": {
+          "binding": ":",
+          "expression": "false"
+        },
+        "command-pending": {
+          "binding": ":",
+          "expression": "false"
+        },
+        "connection-message": {
+          "binding": null,
+          "expression": ""
+        },
+        "current-route": {
+          "binding": ":",
+          "expression": "0"
+        },
+        "sidebar-user-collapsed": {
+          "binding": ":",
+          "expression": "false"
+        },
+        "sidebar-auto-collapsed": {
+          "binding": ":",
+          "expression": "false"
+        },
+        "toast-visible": {
+          "binding": ":",
+          "expression": "false"
+        },
+        "toast-message": {
+          "binding": null,
+          "expression": ""
+        },
+        "toast-kind": {
+          "binding": ":",
+          "expression": "ToastKind . info"
+        },
+        "dialog-visible": {
+          "binding": ":",
+          "expression": "false"
+        },
+        "dialog-title": {
+          "binding": null,
+          "expression": ""
+        },
+        "dialog-message": {
+          "binding": null,
+          "expression": ""
+        },
+        "inbox-tasks": {
+          "binding": null,
+          "expression": ""
+        },
+        "q1-tasks": {
+          "binding": null,
+          "expression": ""
+        },
+        "q2-tasks": {
+          "binding": null,
+          "expression": ""
+        },
+        "q3-tasks": {
+          "binding": null,
+          "expression": ""
+        },
+        "q4-tasks": {
+          "binding": null,
+          "expression": ""
+        },
+        "overdue-tasks": {
+          "binding": null,
+          "expression": ""
+        },
+        "planned-today-tasks": {
+          "binding": null,
+          "expression": ""
+        },
+        "due-today-tasks": {
+          "binding": null,
+          "expression": ""
+        },
+        "needs-reschedule-tasks": {
+          "binding": null,
+          "expression": ""
+        },
+        "today-task-count": {
+          "binding": null,
+          "expression": ""
+        },
+        "focus-tasks": {
+          "binding": null,
+          "expression": ""
+        },
+        "focus-selected-task-id": {
+          "binding": null,
+          "expression": ""
+        },
+        "focus-selected-mode": {
+          "binding": ":",
+          "expression": "1"
+        },
+        "focus-selected-kind": {
+          "binding": ":",
+          "expression": "0"
+        },
+        "focus-session-status": {
+          "binding": ":",
+          "expression": "- 1"
+        },
+        "focus-timer-text": {
+          "binding": ":",
+          "expression": "\"25:00\""
+        },
+        "focus-timer-progress": {
+          "binding": ":",
+          "expression": "0"
+        },
+        "focus-session-label": {
+          "binding": ":",
+          "expression": "\"Ready to focus\""
+        },
+        "focus-today-summary": {
+          "binding": ":",
+          "expression": "\"No productive focus completed today\""
+        },
+        "focus-minutes": {
+          "binding": ":",
+          "expression": "\"25\""
+        },
+        "short-break-minutes": {
+          "binding": ":",
+          "expression": "\"5\""
+        },
+        "long-break-minutes": {
+          "binding": ":",
+          "expression": "\"15\""
+        },
+        "long-break-interval": {
+          "binding": ":",
+          "expression": "\"4\""
+        },
+        "auto-start-break": {
+          "binding": ":",
+          "expression": "false"
+        },
+        "auto-start-focus": {
+          "binding": ":",
+          "expression": "false"
+        },
+        "review-range": {
+          "binding": ":",
+          "expression": "0"
+        },
+        "review-completed-value": {
+          "binding": ":",
+          "expression": "\"0\""
+        },
+        "review-completed-hint": {
+          "binding": null,
+          "expression": ""
+        },
+        "review-focus-value": {
+          "binding": ":",
+          "expression": "\"0m\""
+        },
+        "review-focus-hint": {
+          "binding": null,
+          "expression": ""
+        },
+        "review-sessions-value": {
+          "binding": ":",
+          "expression": "\"0\""
+        },
+        "review-sessions-hint": {
+          "binding": null,
+          "expression": ""
+        },
+        "review-average-value": {
+          "binding": ":",
+          "expression": "\"0m\""
+        },
+        "review-state-summary": {
+          "binding": null,
+          "expression": ""
+        },
+        "review-activity": {
+          "binding": null,
+          "expression": ""
+        },
+        "review-activity-completed-max": {
+          "binding": ":",
+          "expression": "1"
+        },
+        "review-activity-focus-max": {
+          "binding": ":",
+          "expression": "1"
+        },
+        "review-quadrants": {
+          "binding": null,
+          "expression": ""
+        },
+        "review-quadrant-completed-max": {
+          "binding": ":",
+          "expression": "1"
+        },
+        "review-quadrant-focus-max": {
+          "binding": ":",
+          "expression": "1"
+        },
+        "review-longest-focus": {
+          "binding": ":",
+          "expression": "\"0m\""
+        },
+        "review-top-task": {
+          "binding": ":",
+          "expression": "\"No linked task\""
+        },
+        "review-top-task-detail": {
+          "binding": null,
+          "expression": ""
+        },
+        "review-top-quadrant": {
+          "binding": null,
+          "expression": ""
+        },
+        "review-recent": {
+          "binding": null,
+          "expression": ""
+        },
+        "completed-tasks": {
+          "binding": null,
+          "expression": ""
+        },
+        "completed-has-more": {
+          "binding": ":",
+          "expression": "false"
+        },
+        "application-version": {
+          "binding": ":",
+          "expression": "\"0.1.0\""
+        },
+        "backup-directory": {
+          "binding": null,
+          "expression": ""
+        },
+        "latest-backup": {
+          "binding": ":",
+          "expression": "\"No backup created yet\""
+        },
+        "restore-pending": {
+          "binding": ":",
+          "expression": "false"
+        },
+        "update-description": {
+          "binding": null,
+          "expression": ""
+        },
+        "can-open-releases": {
+          "binding": ":",
+          "expression": "true"
+        },
+        "launch-at-startup": {
+          "binding": ":",
+          "expression": "false"
+        },
+        "start-hidden": {
+          "binding": ":",
+          "expression": "false"
+        },
+        "close-to-tray": {
+          "binding": ":",
+          "expression": "true"
+        },
+        "minimize-to-tray": {
+          "binding": ":",
+          "expression": "false"
+        },
+        "autostart-supported": {
+          "binding": ":",
+          "expression": "false"
+        },
+        "tray-supported": {
+          "binding": ":",
+          "expression": "false"
+        },
+        "global-hotkey-available": {
+          "binding": ":",
+          "expression": "false"
+        },
+        "native-notifications-available": {
+          "binding": ":",
+          "expression": "false"
+        },
+        "single-instance-available": {
+          "binding": ":",
+          "expression": "false"
+        }
+      }
+    },
+    "ProductIcons": {
+      "signature": {
+        "kind": "global",
+        "inherits": null,
+        "members": {
+          "quadrants-regular": {
+            "kind": "property",
+            "direction": "out",
+            "type": "image"
+          },
+          "quadrants-filled": {
+            "kind": "property",
+            "direction": "out",
+            "type": "image"
+          },
+          "today-regular": {
+            "kind": "property",
+            "direction": "out",
+            "type": "image"
+          },
+          "today-filled": {
+            "kind": "property",
+            "direction": "out",
+            "type": "image"
+          },
+          "focus-regular": {
+            "kind": "property",
+            "direction": "out",
+            "type": "image"
+          },
+          "focus-filled": {
+            "kind": "property",
+            "direction": "out",
+            "type": "image"
+          },
+          "review-regular": {
+            "kind": "property",
+            "direction": "out",
+            "type": "image"
+          },
+          "review-filled": {
+            "kind": "property",
+            "direction": "out",
+            "type": "image"
+          },
+          "completed-regular": {
+            "kind": "property",
+            "direction": "out",
+            "type": "image"
+          },
+          "completed-filled": {
+            "kind": "property",
+            "direction": "out",
+            "type": "image"
+          },
+          "restore-task": {
+            "kind": "property",
+            "direction": "out",
+            "type": "image"
+          }
+        }
+      },
+      "defaults": {
+        "quadrants-regular": {
+          "binding": ":",
+          "expression": "@ image-url ( \"../../assets/icons/quadrants-20-regular.svg\" )"
+        },
+        "quadrants-filled": {
+          "binding": ":",
+          "expression": "@ image-url ( \"../../assets/icons/quadrants-20-filled.svg\" )"
+        },
+        "today-regular": {
+          "binding": ":",
+          "expression": "@ image-url ( \"../../assets/icons/today-20-regular.svg\" )"
+        },
+        "today-filled": {
+          "binding": ":",
+          "expression": "@ image-url ( \"../../assets/icons/today-20-filled.svg\" )"
+        },
+        "focus-regular": {
+          "binding": ":",
+          "expression": "@ image-url ( \"../../assets/icons/focus-20-regular.svg\" )"
+        },
+        "focus-filled": {
+          "binding": ":",
+          "expression": "@ image-url ( \"../../assets/icons/focus-20-filled.svg\" )"
+        },
+        "review-regular": {
+          "binding": ":",
+          "expression": "@ image-url ( \"../../assets/icons/review-20-regular.svg\" )"
+        },
+        "review-filled": {
+          "binding": ":",
+          "expression": "@ image-url ( \"../../assets/icons/review-20-filled.svg\" )"
+        },
+        "completed-regular": {
+          "binding": ":",
+          "expression": "@ image-url ( \"../../assets/icons/completed-20-regular.svg\" )"
+        },
+        "completed-filled": {
+          "binding": ":",
+          "expression": "@ image-url ( \"../../assets/icons/completed-20-filled.svg\" )"
+        },
+        "restore-task": {
+          "binding": ":",
+          "expression": "@ image-url ( \"../../assets/icons/restore-task-16-regular.svg\" )"
+        }
+      }
+    },
+    "ProductLayout": {
+      "signature": {
+        "kind": "global",
+        "inherits": null,
+        "members": {
+          "focus-wide-breakpoint": {
+            "kind": "property",
+            "direction": "out",
+            "type": "length"
+          }
+        }
+      },
+      "defaults": {
+        "focus-wide-breakpoint": {
+          "binding": ":",
+          "expression": "880px"
+        }
+      }
+    },
+    "ProductTypography": {
+      "signature": {
+        "kind": "global",
+        "inherits": null,
+        "members": {
+          "timer": {
+            "kind": "property",
+            "direction": "out",
+            "type": "length"
+          }
+        }
+      },
+      "defaults": {
+        "timer": {
+          "binding": ":",
+          "expression": "56px"
+        }
+      }
+    },
+    "QuadrantTheme": {
+      "signature": {
+        "kind": "global",
+        "inherits": null,
+        "members": {
+          "q1-accent": {
+            "kind": "property",
+            "direction": "out",
+            "type": "color"
+          },
+          "q2-accent": {
+            "kind": "property",
+            "direction": "out",
+            "type": "color"
+          },
+          "q3-accent": {
+            "kind": "property",
+            "direction": "out",
+            "type": "color"
+          },
+          "q4-accent": {
+            "kind": "property",
+            "direction": "out",
+            "type": "color"
+          }
+        }
+      },
+      "defaults": {
+        "q1-accent": {
+          "binding": ":",
+          "expression": "Theme . dark-mode ? # ff8a7a : # c42b1c"
+        },
+        "q2-accent": {
+          "binding": ":",
+          "expression": "Theme . dark-mode ? # 7db 6f 4 : # 0067c 0"
+        },
+        "q3-accent": {
+          "binding": ":",
+          "expression": "Theme . dark-mode ? # f5c56b : # a15c00"
+        },
+        "q4-accent": {
+          "binding": ":",
+          "expression": "Theme . dark-mode ? # 8fd 6a 6 : # 107c 10"
+        }
+      }
+    },
+    "QuadrantsView": {
+      "signature": {
+        "kind": "component",
+        "inherits": "Rectangle",
+        "members": {
+          "inbox-tasks": {
+            "kind": "property",
+            "direction": "in",
+            "type": "[ InboxItem ]"
+          },
+          "q1-tasks": {
+            "kind": "property",
+            "direction": "in",
+            "type": "[ TaskRow ]"
+          },
+          "q2-tasks": {
+            "kind": "property",
+            "direction": "in",
+            "type": "[ TaskRow ]"
+          },
+          "q3-tasks": {
+            "kind": "property",
+            "direction": "in",
+            "type": "[ TaskRow ]"
+          },
+          "q4-tasks": {
+            "kind": "property",
+            "direction": "in",
+            "type": "[ TaskRow ]"
+          },
+          "move-requested": {
+            "kind": "callback",
+            "arguments": [
+              "string",
+              "int"
+            ],
+            "return": "void",
+            "pure": false
+          },
+          "edit-requested": {
+            "kind": "callback",
+            "arguments": [
+              "string"
+            ],
+            "return": "void",
+            "pure": false
+          },
+          "reorder-requested": {
+            "kind": "callback",
+            "arguments": [
+              "string",
+              "int"
+            ],
+            "return": "void",
+            "pure": false
+          },
+          "complete-requested": {
+            "kind": "callback",
+            "arguments": [
+              "string"
+            ],
+            "return": "void",
+            "pure": false
+          },
+          "delete-requested": {
+            "kind": "callback",
+            "arguments": [
+              "string"
+            ],
+            "return": "void",
+            "pure": false
+          },
+          "add-requested": {
+            "kind": "callback",
+            "arguments": [],
+            "return": "void",
+            "pure": false
+          }
+        }
+      },
+      "defaults": {
+        "inbox-tasks": {
+          "binding": null,
+          "expression": ""
+        },
+        "q1-tasks": {
+          "binding": null,
+          "expression": ""
+        },
+        "q2-tasks": {
+          "binding": null,
+          "expression": ""
+        },
+        "q3-tasks": {
+          "binding": null,
+          "expression": ""
+        },
+        "q4-tasks": {
+          "binding": null,
+          "expression": ""
+        }
+      }
+    },
+    "QuickAddWindow": {
+      "signature": {
+        "kind": "component",
+        "inherits": "Window",
+        "members": {
+          "ui-font-family": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "string"
+          },
+          "title-text": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "string"
+          },
+          "destination": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "int"
+          },
+          "error-message": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "string"
+          },
+          "can-submit": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "bool"
+          },
+          "dispatch-client-update": {
+            "kind": "callback",
+            "arguments": [],
+            "return": "void",
+            "pure": false
+          },
+          "submitted": {
+            "kind": "callback",
+            "arguments": [
+              "string",
+              "int"
+            ],
+            "return": "void",
+            "pure": false
+          },
+          "cancelled": {
+            "kind": "callback",
+            "arguments": [],
+            "return": "void",
+            "pure": false
+          },
+          "apply-theme": {
+            "kind": "function",
+            "arguments": [
+              {
+                "name": "mode",
+                "type": "ThemeMode"
+              },
+              {
+                "name": "system-dark",
+                "type": "bool"
+              }
+            ],
+            "return": "void",
+            "pure": false
+          },
+          "set-theme-mode": {
+            "kind": "function",
+            "arguments": [
+              {
+                "name": "mode",
+                "type": "ThemeMode"
+              }
+            ],
+            "return": "void",
+            "pure": false
+          }
+        }
+      },
+      "defaults": {
+        "ui-font-family": {
+          "binding": "<=>",
+          "expression": "Theme . ui-font-family"
+        },
+        "title-text": {
+          "binding": null,
+          "expression": ""
+        },
+        "destination": {
+          "binding": ":",
+          "expression": "0"
+        },
+        "error-message": {
+          "binding": null,
+          "expression": ""
+        },
+        "can-submit": {
+          "binding": ":",
+          "expression": "true"
+        }
+      }
+    },
+    "ReviewActivityRow": {
+      "signature": {
+        "kind": "struct",
+        "inherits": null,
+        "fields": [
+          {
+            "name": "completed",
+            "type": "int"
+          },
+          {
+            "name": "focus-seconds",
+            "type": "int"
+          },
+          {
+            "name": "label",
+            "type": "string"
+          }
+        ]
+      },
+      "defaults": {}
+    },
+    "ReviewQuadrantRow": {
+      "signature": {
+        "kind": "struct",
+        "inherits": null,
+        "fields": [
+          {
+            "name": "completed",
+            "type": "int"
+          },
+          {
+            "name": "focus-seconds",
+            "type": "int"
+          },
+          {
+            "name": "focus-text",
+            "type": "string"
+          },
+          {
+            "name": "label",
+            "type": "string"
+          }
+        ]
+      },
+      "defaults": {}
+    },
+    "ReviewRecentRow": {
+      "signature": {
+        "kind": "struct",
+        "inherits": null,
+        "fields": [
+          {
+            "name": "metadata",
+            "type": "string"
+          },
+          {
+            "name": "title",
+            "type": "string"
+          }
+        ]
+      },
+      "defaults": {}
+    },
+    "ReviewView": {
+      "signature": {
+        "kind": "component",
+        "inherits": "Rectangle",
+        "members": {
+          "selected-range": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "int"
+          },
+          "completed-value": {
+            "kind": "property",
+            "direction": "in",
+            "type": "string"
+          },
+          "completed-hint": {
+            "kind": "property",
+            "direction": "in",
+            "type": "string"
+          },
+          "focus-value": {
+            "kind": "property",
+            "direction": "in",
+            "type": "string"
+          },
+          "focus-hint": {
+            "kind": "property",
+            "direction": "in",
+            "type": "string"
+          },
+          "sessions-value": {
+            "kind": "property",
+            "direction": "in",
+            "type": "string"
+          },
+          "sessions-hint": {
+            "kind": "property",
+            "direction": "in",
+            "type": "string"
+          },
+          "average-value": {
+            "kind": "property",
+            "direction": "in",
+            "type": "string"
+          },
+          "state-summary": {
+            "kind": "property",
+            "direction": "in",
+            "type": "string"
+          },
+          "activity": {
+            "kind": "property",
+            "direction": "in",
+            "type": "[ ReviewActivityRow ]"
+          },
+          "activity-completed-max": {
+            "kind": "property",
+            "direction": "in",
+            "type": "int"
+          },
+          "activity-focus-max": {
+            "kind": "property",
+            "direction": "in",
+            "type": "int"
+          },
+          "quadrants": {
+            "kind": "property",
+            "direction": "in",
+            "type": "[ ReviewQuadrantRow ]"
+          },
+          "quadrant-completed-max": {
+            "kind": "property",
+            "direction": "in",
+            "type": "int"
+          },
+          "quadrant-focus-max": {
+            "kind": "property",
+            "direction": "in",
+            "type": "int"
+          },
+          "longest-focus": {
+            "kind": "property",
+            "direction": "in",
+            "type": "string"
+          },
+          "top-task": {
+            "kind": "property",
+            "direction": "in",
+            "type": "string"
+          },
+          "top-task-detail": {
+            "kind": "property",
+            "direction": "in",
+            "type": "string"
+          },
+          "top-quadrant": {
+            "kind": "property",
+            "direction": "in",
+            "type": "string"
+          },
+          "recent": {
+            "kind": "property",
+            "direction": "in",
+            "type": "[ ReviewRecentRow ]"
+          },
+          "range-selected": {
+            "kind": "callback",
+            "arguments": [
+              "int"
+            ],
+            "return": "void",
+            "pure": false
+          }
+        }
+      },
+      "defaults": {
+        "selected-range": {
+          "binding": ":",
+          "expression": "0"
+        },
+        "completed-value": {
+          "binding": ":",
+          "expression": "\"0\""
+        },
+        "completed-hint": {
+          "binding": null,
+          "expression": ""
+        },
+        "focus-value": {
+          "binding": ":",
+          "expression": "\"0m\""
+        },
+        "focus-hint": {
+          "binding": null,
+          "expression": ""
+        },
+        "sessions-value": {
+          "binding": ":",
+          "expression": "\"0\""
+        },
+        "sessions-hint": {
+          "binding": null,
+          "expression": ""
+        },
+        "average-value": {
+          "binding": ":",
+          "expression": "\"0m\""
+        },
+        "state-summary": {
+          "binding": null,
+          "expression": ""
+        },
+        "activity": {
+          "binding": null,
+          "expression": ""
+        },
+        "activity-completed-max": {
+          "binding": ":",
+          "expression": "1"
+        },
+        "activity-focus-max": {
+          "binding": ":",
+          "expression": "1"
+        },
+        "quadrants": {
+          "binding": null,
+          "expression": ""
+        },
+        "quadrant-completed-max": {
+          "binding": ":",
+          "expression": "1"
+        },
+        "quadrant-focus-max": {
+          "binding": ":",
+          "expression": "1"
+        },
+        "longest-focus": {
+          "binding": null,
+          "expression": ""
+        },
+        "top-task": {
+          "binding": null,
+          "expression": ""
+        },
+        "top-task-detail": {
+          "binding": null,
+          "expression": ""
+        },
+        "top-quadrant": {
+          "binding": null,
+          "expression": ""
+        },
+        "recent": {
+          "binding": null,
+          "expression": ""
+        }
+      }
+    },
+    "SettingsView": {
+      "signature": {
+        "kind": "component",
+        "inherits": "Rectangle",
+        "members": {
+          "theme-mode": {
+            "kind": "property",
+            "direction": "in",
+            "type": "ThemeMode"
+          },
+          "launch-at-startup": {
+            "kind": "property",
+            "direction": "in",
+            "type": "bool"
+          },
+          "start-hidden": {
+            "kind": "property",
+            "direction": "in",
+            "type": "bool"
+          },
+          "close-to-tray": {
+            "kind": "property",
+            "direction": "in",
+            "type": "bool"
+          },
+          "minimize-to-tray": {
+            "kind": "property",
+            "direction": "in",
+            "type": "bool"
+          },
+          "autostart-supported": {
+            "kind": "property",
+            "direction": "in",
+            "type": "bool"
+          },
+          "tray-supported": {
+            "kind": "property",
+            "direction": "in",
+            "type": "bool"
+          },
+          "global-hotkey-available": {
+            "kind": "property",
+            "direction": "in",
+            "type": "bool"
+          },
+          "native-notifications-available": {
+            "kind": "property",
+            "direction": "in",
+            "type": "bool"
+          },
+          "single-instance-available": {
+            "kind": "property",
+            "direction": "in",
+            "type": "bool"
+          },
+          "backup-directory": {
+            "kind": "property",
+            "direction": "in",
+            "type": "string"
+          },
+          "latest-backup": {
+            "kind": "property",
+            "direction": "in",
+            "type": "string"
+          },
+          "restore-pending": {
+            "kind": "property",
+            "direction": "in",
+            "type": "bool"
+          },
+          "application-version": {
+            "kind": "property",
+            "direction": "in",
+            "type": "string"
+          },
+          "update-description": {
+            "kind": "property",
+            "direction": "in",
+            "type": "string"
+          },
+          "can-open-releases": {
+            "kind": "property",
+            "direction": "in",
+            "type": "bool"
+          },
+          "theme-selected": {
+            "kind": "callback",
+            "arguments": [
+              "ThemeMode"
+            ],
+            "return": "void",
+            "pure": false
+          },
+          "desktop-settings-changed": {
+            "kind": "callback",
+            "arguments": [
+              "bool",
+              "bool",
+              "bool",
+              "bool"
+            ],
+            "return": "void",
+            "pure": false
+          },
+          "create-backup-requested": {
+            "kind": "callback",
+            "arguments": [],
+            "return": "void",
+            "pure": false
+          },
+          "open-backup-directory-requested": {
+            "kind": "callback",
+            "arguments": [],
+            "return": "void",
+            "pure": false
+          },
+          "restore-latest-requested": {
+            "kind": "callback",
+            "arguments": [],
+            "return": "void",
+            "pure": false
+          },
+          "open-releases-requested": {
+            "kind": "callback",
+            "arguments": [],
+            "return": "void",
+            "pure": false
+          }
+        }
+      },
+      "defaults": {
+        "theme-mode": {
+          "binding": ":",
+          "expression": "ThemeMode . system"
+        },
+        "launch-at-startup": {
+          "binding": ":",
+          "expression": "false"
+        },
+        "start-hidden": {
+          "binding": ":",
+          "expression": "false"
+        },
+        "close-to-tray": {
+          "binding": ":",
+          "expression": "true"
+        },
+        "minimize-to-tray": {
+          "binding": ":",
+          "expression": "false"
+        },
+        "autostart-supported": {
+          "binding": ":",
+          "expression": "false"
+        },
+        "tray-supported": {
+          "binding": ":",
+          "expression": "false"
+        },
+        "global-hotkey-available": {
+          "binding": ":",
+          "expression": "false"
+        },
+        "native-notifications-available": {
+          "binding": ":",
+          "expression": "false"
+        },
+        "single-instance-available": {
+          "binding": ":",
+          "expression": "false"
+        },
+        "backup-directory": {
+          "binding": null,
+          "expression": ""
+        },
+        "latest-backup": {
+          "binding": ":",
+          "expression": "\"No backup created yet\""
+        },
+        "restore-pending": {
+          "binding": ":",
+          "expression": "false"
+        },
+        "application-version": {
+          "binding": ":",
+          "expression": "\"0.1.0\""
+        },
+        "update-description": {
+          "binding": null,
+          "expression": ""
+        },
+        "can-open-releases": {
+          "binding": ":",
+          "expression": "true"
+        }
+      }
+    },
+    "Sidebar": {
+      "signature": {
+        "kind": "component",
+        "inherits": "Rectangle",
+        "members": {
+          "collapsed": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "bool"
+          },
+          "auto-collapsed": {
+            "kind": "property",
+            "direction": "in",
+            "type": "bool"
+          },
+          "selected-route": {
+            "kind": "property",
+            "direction": "in",
+            "type": "int"
+          },
+          "route-selected": {
+            "kind": "callback",
+            "arguments": [
+              "int"
+            ],
+            "return": "void",
+            "pure": false
+          },
+          "quick-add-clicked": {
+            "kind": "callback",
+            "arguments": [],
+            "return": "void",
+            "pure": false
+          }
+        }
+      },
+      "defaults": {
+        "collapsed": {
+          "binding": ":",
+          "expression": "false"
+        },
+        "auto-collapsed": {
+          "binding": ":",
+          "expression": "false"
+        },
+        "selected-route": {
+          "binding": ":",
+          "expression": "0"
+        }
+      }
+    },
+    "TaskEditorWindow": {
+      "signature": {
+        "kind": "component",
+        "inherits": "Window",
+        "members": {
+          "ui-font-family": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "string"
+          },
+          "task-id": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "string"
+          },
+          "title-text": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "string"
+          },
+          "notes-text": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "string"
+          },
+          "destination": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "int"
+          },
+          "planned-on": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "string"
+          },
+          "due-at": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "string"
+          },
+          "due-time-zone": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "string"
+          },
+          "reminder-at": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "string"
+          },
+          "reminder-time-zone": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "string"
+          },
+          "recurrence": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "int"
+          },
+          "custom-interval-days": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "string"
+          },
+          "error-message": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "string"
+          },
+          "planned-selected": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "bool"
+          },
+          "planned-date": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "Date"
+          },
+          "due-selected": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "bool"
+          },
+          "due-date": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "Date"
+          },
+          "due-time": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "Time"
+          },
+          "reminder-selected": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "bool"
+          },
+          "reminder-date": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "Date"
+          },
+          "reminder-time": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "Time"
+          },
+          "title-error": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "string"
+          },
+          "planned-error": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "string"
+          },
+          "due-error": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "string"
+          },
+          "due-time-zone-error": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "string"
+          },
+          "reminder-error": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "string"
+          },
+          "reminder-time-zone-error": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "string"
+          },
+          "recurrence-error": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "string"
+          },
+          "can-submit": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "bool"
+          },
+          "submitted": {
+            "kind": "callback",
+            "arguments": [
+              "string",
+              "string",
+              "string",
+              "int",
+              "string",
+              "string",
+              "string",
+              "string",
+              "string",
+              "int",
+              "string"
+            ],
+            "return": "void",
+            "pure": false
+          },
+          "cancelled": {
+            "kind": "callback",
+            "arguments": [],
+            "return": "void",
+            "pure": false
+          },
+          "apply-theme": {
+            "kind": "function",
+            "arguments": [
+              {
+                "name": "mode",
+                "type": "ThemeMode"
+              },
+              {
+                "name": "system-dark",
+                "type": "bool"
+              }
+            ],
+            "return": "void",
+            "pure": false
+          },
+          "set-theme-mode": {
+            "kind": "function",
+            "arguments": [
+              {
+                "name": "mode",
+                "type": "ThemeMode"
+              }
+            ],
+            "return": "void",
+            "pure": false
+          }
+        }
+      },
+      "defaults": {
+        "ui-font-family": {
+          "binding": "<=>",
+          "expression": "Theme . ui-font-family"
+        },
+        "task-id": {
+          "binding": null,
+          "expression": ""
+        },
+        "title-text": {
+          "binding": null,
+          "expression": ""
+        },
+        "notes-text": {
+          "binding": null,
+          "expression": ""
+        },
+        "destination": {
+          "binding": ":",
+          "expression": "0"
+        },
+        "planned-on": {
+          "binding": null,
+          "expression": ""
+        },
+        "due-at": {
+          "binding": null,
+          "expression": ""
+        },
+        "due-time-zone": {
+          "binding": null,
+          "expression": ""
+        },
+        "reminder-at": {
+          "binding": null,
+          "expression": ""
+        },
+        "reminder-time-zone": {
+          "binding": null,
+          "expression": ""
+        },
+        "recurrence": {
+          "binding": ":",
+          "expression": "0"
+        },
+        "custom-interval-days": {
+          "binding": null,
+          "expression": ""
+        },
+        "error-message": {
+          "binding": null,
+          "expression": ""
+        },
+        "planned-selected": {
+          "binding": ":",
+          "expression": "false"
+        },
+        "planned-date": {
+          "binding": ":",
+          "expression": "{ year : 2026 , month : 1 , day : 1 }"
+        },
+        "due-selected": {
+          "binding": ":",
+          "expression": "false"
+        },
+        "due-date": {
+          "binding": ":",
+          "expression": "{ year : 2026 , month : 1 , day : 1 }"
+        },
+        "due-time": {
+          "binding": ":",
+          "expression": "{ hour : 9 , minute : 0 , second : 0 }"
+        },
+        "reminder-selected": {
+          "binding": ":",
+          "expression": "false"
+        },
+        "reminder-date": {
+          "binding": ":",
+          "expression": "{ year : 2026 , month : 1 , day : 1 }"
+        },
+        "reminder-time": {
+          "binding": ":",
+          "expression": "{ hour : 8 , minute : 30 , second : 0 }"
+        },
+        "title-error": {
+          "binding": null,
+          "expression": ""
+        },
+        "planned-error": {
+          "binding": null,
+          "expression": ""
+        },
+        "due-error": {
+          "binding": null,
+          "expression": ""
+        },
+        "due-time-zone-error": {
+          "binding": null,
+          "expression": ""
+        },
+        "reminder-error": {
+          "binding": null,
+          "expression": ""
+        },
+        "reminder-time-zone-error": {
+          "binding": null,
+          "expression": ""
+        },
+        "recurrence-error": {
+          "binding": null,
+          "expression": ""
+        },
+        "can-submit": {
+          "binding": ":",
+          "expression": "true"
+        }
+      }
+    },
+    "TaskRow": {
+      "signature": {
+        "kind": "struct",
+        "inherits": null,
+        "fields": [
+          {
+            "name": "id",
+            "type": "string"
+          },
+          {
+            "name": "title",
+            "type": "string"
+          }
+        ]
+      },
+      "defaults": {}
+    },
+    "TaskRowShell": {
+      "signature": {
+        "kind": "component",
+        "inherits": "Rectangle",
+        "members": {
+          "row-height": {
+            "kind": "property",
+            "direction": "in",
+            "type": "length"
+          },
+          "hovered": {
+            "kind": "property",
+            "direction": "in",
+            "type": "bool"
+          }
+        }
+      },
+      "defaults": {
+        "row-height": {
+          "binding": ":",
+          "expression": "60px"
+        },
+        "hovered": {
+          "binding": ":",
+          "expression": "row-touch . has-hover"
+        }
+      }
+    },
+    "TitleBar": {
+      "signature": {
+        "kind": "component",
+        "inherits": "Rectangle",
+        "members": {
+          "title": {
+            "kind": "property",
+            "direction": "in",
+            "type": "string"
+          },
+          "version": {
+            "kind": "property",
+            "direction": "in",
+            "type": "string"
+          },
+          "is-maximized": {
+            "kind": "property",
+            "direction": "in",
+            "type": "bool"
+          },
+          "theme-mode": {
+            "kind": "property",
+            "direction": "in",
+            "type": "ThemeMode"
+          },
+          "drag-x": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "float"
+          },
+          "drag-y": {
+            "kind": "property",
+            "direction": "in-out",
+            "type": "float"
+          },
+          "close": {
+            "kind": "callback",
+            "arguments": [],
+            "return": "void",
+            "pure": false
+          },
+          "minimize": {
+            "kind": "callback",
+            "arguments": [],
+            "return": "void",
+            "pure": false
+          },
+          "maximize": {
+            "kind": "callback",
+            "arguments": [],
+            "return": "void",
+            "pure": false
+          },
+          "theme-selected": {
+            "kind": "callback",
+            "arguments": [
+              "ThemeMode"
+            ],
+            "return": "void",
+            "pure": false
+          },
+          "drag-delta": {
+            "kind": "callback",
+            "arguments": [
+              "float",
+              "float"
+            ],
+            "return": "void",
+            "pure": false
+          }
+        }
+      },
+      "defaults": {
+        "title": {
+          "binding": ":",
+          "expression": "\"Quadrant\""
+        },
+        "version": {
+          "binding": ":",
+          "expression": "\"0.1.0\""
+        },
+        "is-maximized": {
+          "binding": ":",
+          "expression": "false"
+        },
+        "theme-mode": {
+          "binding": ":",
+          "expression": "ThemeMode . system"
+        },
+        "drag-x": {
+          "binding": null,
+          "expression": ""
+        },
+        "drag-y": {
+          "binding": null,
+          "expression": ""
+        }
+      }
+    },
+    "TodayTaskRow": {
+      "signature": {
+        "kind": "struct",
+        "inherits": null,
+        "fields": [
+          {
+            "name": "id",
+            "type": "string"
+          },
+          {
+            "name": "metadata",
+            "type": "string"
+          },
+          {
+            "name": "title",
+            "type": "string"
+          }
+        ]
+      },
+      "defaults": {}
+    },
+    "TodayView": {
+      "signature": {
+        "kind": "component",
+        "inherits": "Rectangle",
+        "members": {
+          "overdue-tasks": {
+            "kind": "property",
+            "direction": "in",
+            "type": "[ TodayTaskRow ]"
+          },
+          "planned-today-tasks": {
+            "kind": "property",
+            "direction": "in",
+            "type": "[ TodayTaskRow ]"
+          },
+          "due-today-tasks": {
+            "kind": "property",
+            "direction": "in",
+            "type": "[ TodayTaskRow ]"
+          },
+          "needs-reschedule-tasks": {
+            "kind": "property",
+            "direction": "in",
+            "type": "[ TodayTaskRow ]"
+          },
+          "unique-task-count": {
+            "kind": "property",
+            "direction": "in",
+            "type": "int"
+          },
+          "edit-requested": {
+            "kind": "callback",
+            "arguments": [
+              "string"
+            ],
+            "return": "void",
+            "pure": false
+          },
+          "complete-requested": {
+            "kind": "callback",
+            "arguments": [
+              "string"
+            ],
+            "return": "void",
+            "pure": false
+          }
+        }
+      },
+      "defaults": {
+        "overdue-tasks": {
+          "binding": null,
+          "expression": ""
+        },
+        "planned-today-tasks": {
+          "binding": null,
+          "expression": ""
+        },
+        "due-today-tasks": {
+          "binding": null,
+          "expression": ""
+        },
+        "needs-reschedule-tasks": {
+          "binding": null,
+          "expression": ""
+        },
+        "unique-task-count": {
+          "binding": null,
+          "expression": ""
+        }
+      }
+    }
+  },
+  "rust_host": {
+    "methods": {
+      "GuiShell::new": "pub fn new ( mode : quadrant-protocol : : GuiLaunchMode , snapshot : & AppSnapshot , version : & str , on-command : impl Fn ( GuiCommand ) -> bool + ' static , ) -> Result < Self , slint : : PlatformError >",
+      "GuiShell::update_sink": "pub fn update-sink ( & self ) -> ClientUpdateSink",
+      "GuiShell::run": "pub fn run ( self ) -> Result < ( ) , slint : : PlatformError >",
+      "UiShell::new": "pub fn new ( config : & AppSnapshot , application-version : & str , on-command : impl Fn ( GuiCommand ) -> bool + ' static , ) -> Result < Self , slint : : PlatformError >",
+      "UiShell::update_sink": "pub fn update-sink ( & self ) -> ClientUpdateSink",
+      "UiShell::run": "pub fn run ( self ) -> Result < ( ) , slint : : PlatformError >"
+    },
+    "declarations": [
+      "pub type ClientUpdateSink = Arc < dyn Fn ( ClientUpdate ) + Send + Sync > ;",
+      "pub enum GuiShell { Main ( UiShell ) , QuickAdd ( standalone : : QuickAddShell ) , }"
+    ],
+    "reexports": [
+      "pub use shell : : { ClientUpdateSink , GuiShell , UiShell } ;"
+    ],
+    "generated_module": true
+  },
+  "build_contract": "use std : : collections : : HashMap ; fn main ( ) { let facade = quadrant-kit : : slint-library-path ( ) ; assert ! ( facade . is-file ( ) , \"Kit facade must be a file\" ) ; let libraries = HashMap : : from ( [ ( quadrant-kit : : SLINT-LIBRARY-NAME . to-owned ( ) , facade ) ] ) ; let config = slint-build : : CompilerConfiguration : : new ( ) . with-style ( \"fluent\" . into ( ) ) . with-library-paths ( libraries ) . embed-resources ( slint-build : : EmbedResourcesKind : : EmbedFiles ) ; slint-build : : compile-with-config ( \"../../ui/app.slint\" , config ) . expect ( \"failed to compile the Quadrant Slint UI\" ) ; }"
+}

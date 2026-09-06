@@ -4087,6 +4087,11 @@ dependencies = [
 ]
 
 [[package]]
+name = "quadrant-kit"
+version = "0.1.0"
+source = "git+https://github.com/wadaxiyang/Quadrant-Kit.git?rev=838ecfbead2d0a1966907ddd742cb6f34516d3f6#838ecfbead2d0a1966907ddd742cb6f34516d3f6"
+
+[[package]]
 name = "quadrant-platform"
 version = "0.1.1"
 dependencies = [
@@ -4136,17 +4141,9 @@ dependencies = [
  "png",
  "quadrant-application",
  "quadrant-domain",
+ "quadrant-kit",
  "quadrant-protocol",
  "serde_json",
- "slint",
- "slint-build",
-]
-
-[[package]]
-name = "quadrant-ui-gallery"
-version = "0.1.1"
-dependencies = [
- "png",
  "slint",
  "slint-build",
 ]

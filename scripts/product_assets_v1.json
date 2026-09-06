@@ -1,0 +1,72 @@
+{
+  "schema_version": 1,
+  "source_commit": "d2b423d4b7f557116f6fe655dcc67aac60db2d7f",
+  "assets": [
+    {
+      "property": "quadrants_regular",
+      "path": "assets/icons/quadrants-20-regular.svg",
+      "sha256": "9bdbca69935af26af5307d0633e3b49ea27fe727a0d17d9263cf1120414484da",
+      "spdx_license": "MIT"
+    },
+    {
+      "property": "quadrants_filled",
+      "path": "assets/icons/quadrants-20-filled.svg",
+      "sha256": "29bf62eb78e0c5e7385db72406903ea880e4d81a6bedd48e69958131d78463b6",
+      "spdx_license": "MIT"
+    },
+    {
+      "property": "today_regular",
+      "path": "assets/icons/today-20-regular.svg",
+      "sha256": "865ba1fb66368ca63b5166197c00d9953c13f3fb1991a4e0c6e311fefceb9123",
+      "spdx_license": "MIT"
+    },
+    {
+      "property": "today_filled",
+      "path": "assets/icons/today-20-filled.svg",
+      "sha256": "7cb530cd65b11c33f04ecd6f537361dbae6e039d66e6855cc5dd98efcb823b9f",
+      "spdx_license": "MIT"
+    },
+    {
+      "property": "focus_regular",
+      "path": "assets/icons/focus-20-regular.svg",
+      "sha256": "d1548fbab6cde8f402def62fab340ceb00d7e96f0d365e7e7459e9e4e9cfd480",
+      "spdx_license": "MIT"
+    },
+    {
+      "property": "focus_filled",
+      "path": "assets/icons/focus-20-filled.svg",
+      "sha256": "226362ae21cc959f045ee76130b29ee9af9d6b555bf43a65deaf99448b4ae3a9",
+      "spdx_license": "MIT"
+    },
+    {
+      "property": "review_regular",
+      "path": "assets/icons/review-20-regular.svg",
+      "sha256": "42b8288ea08ec595931368cc19e7efc9e7ae7c1be84d35e77a56c89f41a65a83",
+      "spdx_license": "MIT"
+    },
+    {
+      "property": "review_filled",
+      "path": "assets/icons/review-20-filled.svg",
+      "sha256": "15ec4d3c4aa31424c583e5d6ff409e757df5926d9eaa9431ce78d7960cfe155d",
+      "spdx_license": "MIT"
+    },
+    {
+      "property": "completed_regular",
+      "path": "assets/icons/completed-20-regular.svg",
+      "sha256": "7a963af3502ded2bd386a400c1a6b2749d4c1d8b51a70edca05c3c464ecbd3f2",
+      "spdx_license": "MIT"
+    },
+    {
+      "property": "completed_filled",
+      "path": "assets/icons/completed-20-filled.svg",
+      "sha256": "493e16380a87a063702ee773eed3d931ff8a8466ef862bf2d6a0f160a7bbf150",
+      "spdx_license": "MIT"
+    },
+    {
+      "property": "restore_task",
+      "path": "assets/icons/restore-task-16-regular.svg",
+      "sha256": "a7d93fe4acc49debaba895b18f131c51e6a3940844ac075f505817aa237404b6",
+      "spdx_license": "MIT"
+    }
+  ]
+}

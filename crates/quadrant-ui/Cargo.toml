@@ -16,6 +16,7 @@ jiff.workspace = true
 slint.workspace = true
 
 [build-dependencies]
+quadrant-kit.workspace = true
 slint-build.workspace = true
 
 [dev-dependencies]

@@ -1,6 +1,8 @@
 name: CI
 
 on:
+  push:
+  pull_request:
   workflow_dispatch:
 
 permissions:
@@ -11,20 +13,26 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: dtolnay/rust-toolchain@stable
+      - uses: dtolnay/rust-toolchain@1.94.1
         with:
           components: clippy,rustfmt
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
       - uses: Swatinem/rust-cache@v2
       - name: Install Linux UI dependencies
         run: >-
           sudo apt-get update && sudo apt-get install -y
           libfontconfig1-dev libx11-xcb-dev xinput libxcursor-dev
           libxkbcommon-x11-dev libx11-dev
+      - run: python -m unittest discover -s scripts/tests -v
+      - run: python scripts/check_ui_boundaries.py
       - run: cargo fmt --all --check
-      - run: cargo clippy --workspace --all-targets --all-features -- -D warnings
-      - run: cargo test --workspace
+      - run: cargo clippy --workspace --all-targets --all-features --locked -- -D warnings
+      - run: cargo test --workspace --locked
+      - run: cargo build --locked -p quadrant-agent -p quadrant-app
 
-  target-check:
+  native:
     strategy:
       fail-fast: false
       matrix:
@@ -32,6 +40,41 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v7
-      - uses: dtolnay/rust-toolchain@stable
+      - uses: dtolnay/rust-toolchain@1.94.1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
       - uses: Swatinem/rust-cache@v2
-      - run: cargo check --workspace --all-targets
+      - run: python -m unittest discover -s scripts/tests -v
+      - run: python scripts/check_ui_boundaries.py
+      - run: cargo check --workspace --all-targets --locked
+      - run: cargo test --workspace --locked
+      - run: cargo build --locked -p quadrant-agent -p quadrant-app
+      - name: Windows synthetic native windows
+        if: runner.os == 'Windows'
+        shell: pwsh
+        env:
+          SLINT_BACKEND: winit-software
+        run: |
+          cargo build --locked -p quadrant-ui --example product_windows_probe
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          foreach ($theme in @('light', 'dark')) {
+            & ./target/debug/examples/product_windows_probe.exe "target/native-probe/$theme" $theme
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          }
+      - uses: actions/upload-artifact@v4
+        if: runner.os == 'Windows'
+        with:
+          name: product-native-windows
+          path: target/native-probe/**/*.png
+          if-no-files-found: error
+
+  msrv:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@1.92.0
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: tasks-msrv-1.92
+      - run: cargo +1.92.0 build --locked -p quadrant-agent -p quadrant-app

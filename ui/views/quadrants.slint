@@ -1,23 +1,12 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 Quadrant contributors
 // SPDX-License-Identifier: GPL-3.0-only
 
+import { QuadrantTheme } from "../product/quadrant_theme.slint";
 import { ScrollView } from "std-widgets.slint";
-import {
-    Badge,
-    Elevation,
-    FluentButton,
-    FluentIcons as Icons,
-    IconButton,
-    InboxItem,
-    InboxPane,
-    PageHeader,
-    SegmentButton,
-    SurfaceCard,
-    TaskRowShell,
-    Theme,
-    Typography,
-    UiConstants,
-} from "../kit/kit.slint";
+import { Badge, Elevation, FluentButton, FluentIcons as Icons, IconButton, PageHeader, SegmentButton, SurfaceCard, Theme, Typography, UiConstants } from "@quadrant-kit";
+import { InboxItem } from "../product/inbox_types.slint";
+import { InboxPane } from "../components/inbox/inbox_pane.slint";
+import { TaskRowShell } from "../components/task_row_shell.slint";
 
 export struct TaskRow {
     id: string,
@@ -293,7 +282,7 @@ export component QuadrantsView inherits Rectangle {
                         HorizontalLayout {
                             spacing: UiConstants.space_12;
                             TaskColumn {
-                                code: "Q1"; title: "Important + Urgent"; subtitle: "Do now"; accent: Theme.q1_accent;
+                                code: "Q1"; title: "Important + Urgent"; subtitle: "Do now"; accent: QuadrantTheme.q1_accent;
                                 destination: 1; tasks: root.q1_tasks;
                                 move_requested(id, destination) => { root.move_requested(id, destination); }
                                 edit_requested(id) => { root.edit_requested(id); }
@@ -302,7 +291,7 @@ export component QuadrantsView inherits Rectangle {
                                 delete_requested(id) => { root.delete_requested(id); }
                             }
                             TaskColumn {
-                                code: "Q2"; title: "Important + Not urgent"; subtitle: "Plan deliberately"; accent: Theme.q2_accent;
+                                code: "Q2"; title: "Important + Not urgent"; subtitle: "Plan deliberately"; accent: QuadrantTheme.q2_accent;
                                 destination: 2; tasks: root.q2_tasks;
                                 move_requested(id, destination) => { root.move_requested(id, destination); }
                                 edit_requested(id) => { root.edit_requested(id); }
@@ -315,7 +304,7 @@ export component QuadrantsView inherits Rectangle {
                         HorizontalLayout {
                             spacing: UiConstants.space_12;
                             TaskColumn {
-                                code: "Q3"; title: "Not important + Urgent"; subtitle: "Delegate or contain"; accent: Theme.q3_accent;
+                                code: "Q3"; title: "Not important + Urgent"; subtitle: "Delegate or contain"; accent: QuadrantTheme.q3_accent;
                                 destination: 3; tasks: root.q3_tasks;
                                 move_requested(id, destination) => { root.move_requested(id, destination); }
                                 edit_requested(id) => { root.edit_requested(id); }
@@ -324,7 +313,7 @@ export component QuadrantsView inherits Rectangle {
                                 delete_requested(id) => { root.delete_requested(id); }
                             }
                             TaskColumn {
-                                code: "Q4"; title: "Not important + Not urgent"; subtitle: "Reduce or remove"; accent: Theme.q4_accent;
+                                code: "Q4"; title: "Not important + Not urgent"; subtitle: "Reduce or remove"; accent: QuadrantTheme.q4_accent;
                                 destination: 4; tasks: root.q4_tasks;
                                 move_requested(id, destination) => { root.move_requested(id, destination); }
                                 edit_requested(id) => { root.edit_requested(id); }
@@ -354,7 +343,7 @@ export component QuadrantsView inherits Rectangle {
                     spacing: UiConstants.space_12;
                     TaskColumn {
                         content_sized: true;
-                        code: "Q1"; title: "Important + Urgent"; subtitle: "Do now"; accent: Theme.q1_accent;
+                        code: "Q1"; title: "Important + Urgent"; subtitle: "Do now"; accent: QuadrantTheme.q1_accent;
                         destination: 1; tasks: root.q1_tasks;
                         move_requested(id, destination) => { root.move_requested(id, destination); }
                         edit_requested(id) => { root.edit_requested(id); }
@@ -364,7 +353,7 @@ export component QuadrantsView inherits Rectangle {
                     }
                     TaskColumn {
                         content_sized: true;
-                        code: "Q2"; title: "Important + Not urgent"; subtitle: "Plan deliberately"; accent: Theme.q2_accent;
+                        code: "Q2"; title: "Important + Not urgent"; subtitle: "Plan deliberately"; accent: QuadrantTheme.q2_accent;
                         destination: 2; tasks: root.q2_tasks;
                         move_requested(id, destination) => { root.move_requested(id, destination); }
                         edit_requested(id) => { root.edit_requested(id); }
@@ -378,7 +367,7 @@ export component QuadrantsView inherits Rectangle {
                     spacing: UiConstants.space_12;
                     TaskColumn {
                         content_sized: true;
-                        code: "Q3"; title: "Not important + Urgent"; subtitle: "Delegate or contain"; accent: Theme.q3_accent;
+                        code: "Q3"; title: "Not important + Urgent"; subtitle: "Delegate or contain"; accent: QuadrantTheme.q3_accent;
                         destination: 3; tasks: root.q3_tasks;
                         move_requested(id, destination) => { root.move_requested(id, destination); }
                         edit_requested(id) => { root.edit_requested(id); }
@@ -388,7 +377,7 @@ export component QuadrantsView inherits Rectangle {
                     }
                     TaskColumn {
                         content_sized: true;
-                        code: "Q4"; title: "Not important + Not urgent"; subtitle: "Reduce or remove"; accent: Theme.q4_accent;
+                        code: "Q4"; title: "Not important + Not urgent"; subtitle: "Reduce or remove"; accent: QuadrantTheme.q4_accent;
                         destination: 4; tasks: root.q4_tasks;
                         move_requested(id, destination) => { root.move_requested(id, destination); }
                         edit_requested(id) => { root.edit_requested(id); }
@@ -412,28 +401,28 @@ export component QuadrantsView inherits Rectangle {
                     item_delete_requested(id) => { root.delete_requested(id); }
                 }
                 TaskColumn {
-                    content_sized: true; code: "Q1"; title: "Important + Urgent"; subtitle: "Do now"; accent: Theme.q1_accent;
+                    content_sized: true; code: "Q1"; title: "Important + Urgent"; subtitle: "Do now"; accent: QuadrantTheme.q1_accent;
                     destination: 1; tasks: root.q1_tasks;
                     move_requested(id, destination) => { root.move_requested(id, destination); } edit_requested(id) => { root.edit_requested(id); }
                     reorder_requested(id, direction) => { root.reorder_requested(id, direction); } complete_requested(id) => { root.complete_requested(id); }
                     delete_requested(id) => { root.delete_requested(id); }
                 }
                 TaskColumn {
-                    content_sized: true; code: "Q2"; title: "Important + Not urgent"; subtitle: "Plan deliberately"; accent: Theme.q2_accent;
+                    content_sized: true; code: "Q2"; title: "Important + Not urgent"; subtitle: "Plan deliberately"; accent: QuadrantTheme.q2_accent;
                     destination: 2; tasks: root.q2_tasks;
                     move_requested(id, destination) => { root.move_requested(id, destination); } edit_requested(id) => { root.edit_requested(id); }
                     reorder_requested(id, direction) => { root.reorder_requested(id, direction); } complete_requested(id) => { root.complete_requested(id); }
                     delete_requested(id) => { root.delete_requested(id); }
                 }
                 TaskColumn {
-                    content_sized: true; code: "Q3"; title: "Not important + Urgent"; subtitle: "Delegate or contain"; accent: Theme.q3_accent;
+                    content_sized: true; code: "Q3"; title: "Not important + Urgent"; subtitle: "Delegate or contain"; accent: QuadrantTheme.q3_accent;
                     destination: 3; tasks: root.q3_tasks;
                     move_requested(id, destination) => { root.move_requested(id, destination); } edit_requested(id) => { root.edit_requested(id); }
                     reorder_requested(id, direction) => { root.reorder_requested(id, direction); } complete_requested(id) => { root.complete_requested(id); }
                     delete_requested(id) => { root.delete_requested(id); }
                 }
                 TaskColumn {
-                    content_sized: true; code: "Q4"; title: "Not important + Not urgent"; subtitle: "Reduce or remove"; accent: Theme.q4_accent;
+                    content_sized: true; code: "Q4"; title: "Not important + Not urgent"; subtitle: "Reduce or remove"; accent: QuadrantTheme.q4_accent;
                     destination: 4; tasks: root.q4_tasks;
                     move_requested(id, destination) => { root.move_requested(id, destination); } edit_requested(id) => { root.edit_requested(id); }
                     reorder_requested(id, direction) => { root.reorder_requested(id, direction); } complete_requested(id) => { root.complete_requested(id); }

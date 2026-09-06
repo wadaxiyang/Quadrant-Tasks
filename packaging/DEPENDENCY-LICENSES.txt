@@ -2,7 +2,9 @@ Quadrant Rust Dependency License Inventory
 =========================================
 
 Generated from Cargo.lock metadata. License expressions are package-declared SPDX values.
-Corresponding source is available through each crates.io package and the Quadrant source tree.
+Corresponding source is available through each crates.io package and the Quadrant-Tasks source tree.
+The UI build also uses quadrant-kit 0.1.0 | GPL-3.0-only | https://github.com/wadaxiyang/Quadrant-Kit
+Pinned Git source: 838ecfbead2d0a1966907ddd742cb6f34516d3f6 (see THIRD-PARTY-NOTICES.txt).
 
 ab_glyph 0.2.32 | Apache-2.0 | https://github.com/alexheretic/ab-glyph
 ab_glyph_rasterizer 0.1.10 | Apache-2.0 | https://github.com/alexheretic/ab-glyph

@@ -2,6 +2,7 @@
 set -eu
 
 repository=$(CDPATH= cd -- "$(dirname -- "$0")/../.." && pwd)
+python3 "$repository/scripts/check_ui_boundaries.py"
 version=$(awk -F'"' '/^version = "/ { print $2; exit }' "$repository/Cargo.toml")
 target_root="$repository/target/package/macos"
 bundle="$target_root/Quadrant.app"
@@ -22,6 +23,7 @@ cp "$repository/target/release/quadrant-app" "$bundle/Contents/MacOS/quadrant"
 cp "$repository/target/release/quadrant-agent" "$bundle/Contents/MacOS/"
 cp "$repository/assets/branding/Quadrant.icns" "$bundle/Contents/Resources/"
 cp "$repository/LICENSE" "$bundle/Contents/Resources/"
+cp "$repository/assets/icons/LICENSE-MIT" "$bundle/Contents/Resources/LICENSE-Fluent-Icons.txt"
 cp "$repository/packaging/THIRD-PARTY-NOTICES.txt" "$bundle/Contents/Resources/"
 cp "$repository/packaging/DEPENDENCY-LICENSES.txt" "$bundle/Contents/Resources/"
 sed "s/@VERSION@/$version/g" "$repository/packaging/macos/Info.plist.in" > "$bundle/Contents/Info.plist"

@@ -4,6 +4,8 @@ param(
 
 $ErrorActionPreference = 'Stop'
 $repository = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '..\..')).Path
+& python (Join-Path $repository 'scripts\check_ui_boundaries.py')
+if ($LASTEXITCODE -ne 0) { throw 'Product source/boundary verification failed.' }
 $targetRoot = Join-Path $repository 'target\package\windows'
 $versionLine = Get-Content -LiteralPath (Join-Path $repository 'Cargo.toml') |
     Where-Object { $_ -match '^version = "([^"]+)"' } |
@@ -33,6 +35,7 @@ New-Item -ItemType Directory -Path $staging | Out-Null
 Copy-Item -LiteralPath (Join-Path $repository 'target\release\quadrant-app.exe') -Destination (Join-Path $staging 'quadrant.exe')
 Copy-Item -LiteralPath (Join-Path $repository 'target\release\quadrant-agent.exe') -Destination $staging
 Copy-Item -LiteralPath (Join-Path $repository 'LICENSE') -Destination $staging
+Copy-Item -LiteralPath (Join-Path $repository 'assets\icons\LICENSE-MIT') -Destination (Join-Path $staging 'LICENSE-Fluent-Icons.txt')
 Copy-Item -LiteralPath (Join-Path $repository 'README.md') -Destination $staging
 Copy-Item -LiteralPath (Join-Path $repository 'packaging\THIRD-PARTY-NOTICES.txt') -Destination $staging
 Copy-Item -LiteralPath (Join-Path $repository 'packaging\DEPENDENCY-LICENSES.txt') -Destination $staging

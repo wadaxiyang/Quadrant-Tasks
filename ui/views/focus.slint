@@ -1,19 +1,10 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 Quadrant contributors
 // SPDX-License-Identifier: GPL-3.0-only
 
+import { ProductTypography } from "../product/product_typography.slint";
+import { ProductLayout } from "../product/product_layout.slint";
 import { ScrollView, Switch } from "std-widgets.slint";
-import {
-    FluentButton,
-    FluentTextField,
-    PageHeader,
-    SectionHeader,
-    SegmentButton,
-    SettingRow,
-    SurfaceCard,
-    Theme,
-    Typography,
-    UiConstants,
-} from "../kit/kit.slint";
+import { FluentButton, FluentTextField, PageHeader, SectionHeader, SegmentButton, SettingRow, SurfaceCard, Theme, Typography, UiConstants } from "@quadrant-kit";
 
 export struct FocusTaskRow {
     id: string,
@@ -152,7 +143,7 @@ component FocusTimerCard inherits SurfaceCard {
                 Text {
                     text: root.timer_text;
                     color: Theme.text_primary;
-                    font-size: Typography.timer;
+                    font-size: ProductTypography.timer;
                     font-weight: Typography.regular;
                     horizontal-alignment: center;
                     vertical-alignment: center;
@@ -377,7 +368,7 @@ export component FocusView inherits Rectangle {
     property <bool> idle: root.session_status < 0;
     property <bool> productive_phase: root.selected_mode == 0 || root.selected_kind == 0;
     property <bool> compact: root.width < UiConstants.compact_breakpoint;
-    property <bool> wide: root.width >= UiConstants.focus_wide_breakpoint;
+    property <bool> wide: root.width >= ProductLayout.focus_wide_breakpoint;
     property <length> responsive_padding: root.compact ? UiConstants.page_padding_compact :
                                                    root.wide ? UiConstants.page_padding_wide : UiConstants.page_padding_medium;
 

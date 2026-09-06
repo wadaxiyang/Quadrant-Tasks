@@ -1,605 +1,299 @@
 #!/usr/bin/env python3
 # SPDX-FileCopyrightText: Copyright (c) 2026 Quadrant contributors
 # SPDX-License-Identifier: GPL-3.0-only
+"""Tasks Product contracts and remote Kit/Agent/GUI ownership guard.
 
-"""Enforce Quadrant UI dependency boundaries and the frozen shared API."""
-
-from __future__ import annotations
-
+Retains the original export/import/dependency/provenance checks, using the
+scanner reviewed in Kit commit 838ecfbead2d0a1966907ddd742cb6f34516d3f6.
+Slint compilation supplements this bounded source scanner.
+"""
+import argparse
+import difflib
+import hashlib
 import json
-import re
-from dataclasses import dataclass
+import os
 from pathlib import Path
+import re
+import subprocess
+import sys
+import tomllib
+from slint_contract import ContractError, Cursor, canonical, images, lex, local_path, parse
+
+ROOT = Path(__file__).resolve().parents[1]
+KIT_URL = 'https://github.com/wadaxiyang/Quadrant-Kit.git'
+KIT_REV = '838ecfbead2d0a1966907ddd742cb6f34516d3f6'
+REMOVED = ('ui/kit', 'ui/gallery', 'crates/quadrant-ui-gallery', 'scripts/capture_gallery_baseline.ps1')
+EXCLUDED = {'.git', 'target', '__pycache__'}
 
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
-UI_ROOT = REPO_ROOT / "ui"
-CRATES_ROOT = REPO_ROOT / "crates"
-BASELINE_PATH = Path(__file__).with_name("ui_api_baseline_v1.json")
-
-IMPORT_RE = re.compile(
-    r"(?:import|export)\s*\{.*?\}\s*from\s*\"([^\"]+)\"\s*;", re.DOTALL
-)
-EXPORT_RE = re.compile(
-    r"^\s*export\s+(component|global|enum|struct)\s+([A-Za-z_][A-Za-z0-9_]*)"
-    r"(?:\s+inherits\s+([^\s{]+))?",
-    re.MULTILINE,
-)
-REEXPORT_RE = re.compile(
-    r"export\s*\{(.*?)\}\s*from\s*\"([^\"]+)\"\s*;", re.DOTALL
-)
-API_DECL_RE = re.compile(
-    r"^(?:(?:in|out|in-out)\s+property\s+<[^>]+>\s+[A-Za-z_][A-Za-z0-9_]*"
-    r"(?:\s*:[^;]+)?|callback\s+[A-Za-z_][A-Za-z0-9_]*(?:\([^;]*\))?"
-    r"|public\s+function\s+[A-Za-z_][A-Za-z0-9_]*\([^)]*\)(?:\s*->\s*[^\s{]+)?)\s*;?$"
-)
+def files(root, pattern):
+    return sorted(p for p in root.rglob(pattern) if not EXCLUDED.intersection(p.relative_to(root).parts) and not any(part.startswith('.tmp-') for part in p.relative_to(root).parts))
 
 
-@dataclass(frozen=True)
-class Finding:
-    code: str
-    location: str
-    message: str
-
-
-def relative(path: Path) -> str:
-    return path.relative_to(REPO_ROOT).as_posix()
-
-
-def normalize_space(value: str) -> str:
-    return " ".join(value.strip().split())
-
-
-def slint_files(root: Path) -> list[Path]:
-    if not root.exists():
-        return []
-    return sorted(root.rglob("*.slint"))
-
-
-def import_targets(path: Path) -> list[tuple[str, Path | None]]:
-    text = path.read_text(encoding="utf-8")
-    targets: list[tuple[str, Path | None]] = []
-    for source in IMPORT_RE.findall(text):
-        if source == "std-widgets.slint":
-            targets.append((source, None))
-            continue
-        targets.append((source, (path.parent / source).resolve()))
-    return targets
-
-
-def is_within(path: Path, root: Path) -> bool:
-    try:
-        path.relative_to(root.resolve())
-    except ValueError:
-        return False
-    return True
-
-
-def matching_brace(text: str, opening: int) -> int | None:
-    depth = 0
-    for index in range(opening, len(text)):
-        char = text[index]
-        if char == "{":
-            depth += 1
-        elif char == "}":
-            depth -= 1
-            if depth == 0:
-                return index
-    return None
-
-
-def top_level_api(body: str) -> list[str]:
-    declarations: list[str] = []
-    depth = 0
-    for raw_line in body.splitlines():
-        line = raw_line.strip()
-        if depth == 0 and API_DECL_RE.match(normalize_space(line)):
-            declarations.append(normalize_space(line))
-        depth += raw_line.count("{") - raw_line.count("}")
-    return declarations
-
-
-def exported_definitions(path: Path) -> list[dict[str, object]]:
-    text = path.read_text(encoding="utf-8")
-    definitions: list[dict[str, object]] = []
-    for match in EXPORT_RE.finditer(text):
-        kind, name, inherits = match.groups()
-        opening = text.find("{", match.end())
-        if opening < 0:
-            continue
-        closing = matching_brace(text, opening)
-        if closing is None:
-            continue
-        body = text[opening + 1 : closing]
-        if kind == "enum":
-            api = [normalize_space(item) for item in body.split(",") if item.strip()]
+def fingerprint_definitions(text):
+    """Ignore imports, declaration names and comments when detecting copies."""
+    cursor, result = Cursor(lex(text)), []
+    while cursor.peek():
+        if cursor.peek('export'):
+            cursor.take()
+        if cursor.peek() in ('component', 'global', 'enum', 'struct'):
+            kind, name = cursor.take().value, cursor.name()
+            header = cursor.until({'{'})
+            body = cursor.group('{', '}')
+            result.append((name, hashlib.sha256((kind + canonical(header + body)).encode()).hexdigest()))
+        elif cursor.peek('import') or cursor.peek('{'):
+            if cursor.peek('import'):
+                cursor.take()
+            cursor.group('{', '}')
+            cursor.until({';'})
+            cursor.take(';')
         else:
-            api = top_level_api(body)
-        definitions.append(
-            {
-                "kind": kind,
-                "name": name,
-                "inherits": inherits,
-                "api": api,
-                "file": relative(path),
-            }
-        )
-    return definitions
+            raise ContractError(f'Unknown declaration: {cursor.peek()}')
+    return result
 
 
-def frozen_api_findings() -> list[Finding]:
-    if not BASELINE_PATH.exists():
-        return [Finding("API000", relative(BASELINE_PATH), "frozen API baseline is missing")]
-
-    baseline = json.loads(BASELINE_PATH.read_text(encoding="utf-8"))
-    expected = baseline["exports"]
-    current_by_name: dict[str, list[dict[str, object]]] = {}
-    for path in slint_files(UI_ROOT):
-        for definition in exported_definitions(path):
-            current_by_name.setdefault(str(definition["name"]), []).append(definition)
-
-    findings: list[Finding] = []
-    for name, expected_definition in expected.items():
-        definitions = current_by_name.get(name, [])
-        if not definitions:
-            findings.append(Finding("API001", name, "frozen public export is missing"))
-            continue
-        if len(definitions) > 1:
-            locations = ", ".join(str(item["file"]) for item in definitions)
-            findings.append(
-                Finding("API002", name, f"frozen public export has duplicate definitions: {locations}")
-            )
-            continue
-        current = definitions[0]
-        for key in ("kind", "inherits", "api"):
-            if current[key] != expected_definition[key]:
-                findings.append(
-                    Finding(
-                        "API003",
-                        str(current["file"]),
-                        f"{name} {key} differs from scripts/ui_api_baseline_v1.json",
-                    )
-                )
-    return findings
+def product_api(root=ROOT):
+    exports = {}
+    for path in files(root / 'ui', '*.slint'):
+        module = parse(path.read_text(encoding='utf-8'))
+        for name in module['definitions'].keys() & module['exports'].keys():
+            if name in exports:
+                raise ContractError(f'Duplicate Product export: {name}')
+            exports[name] = module['definitions'][name]
+    return dict(sorted(exports.items()))
 
 
-def duplicate_export_findings() -> list[Finding]:
-    locations: dict[str, list[str]] = {}
-    for path in slint_files(UI_ROOT):
-        for definition in exported_definitions(path):
-            locations.setdefault(str(definition["name"]), []).append(str(definition["file"]))
-    return [
-        Finding("UI001", name, f"exported definition appears in: {', '.join(files)}")
-        for name, files in sorted(locations.items())
-        if len(files) > 1
-    ]
+def rust_host_api(root=ROOT):
+    source = (root / 'crates/quadrant-ui/src/shell.rs').read_text(encoding='utf-8')
+    methods = {}
+    for match in re.finditer(r'\bpub fn\s+([a-z_]+)\s*\(', source):
+        owners = list(re.finditer(r'\bimpl\s+(\w+)\s*\{', source[:match.start()]))
+        if not owners:
+            raise ContractError('Unknown public Rust method owner')
+        header = source[match.start():source.index('{', match.start())]
+        methods[owners[-1][1] + '::' + match[1]] = canonical(lex(header))
+    declarations = re.findall(r'pub type\s+[^;]+;|pub enum GuiShell\s*\{[^}]+\}', source)
+    facade = (root / 'crates/quadrant-ui/src/lib.rs').read_text(encoding='utf-8')
+    return {'methods': methods, 'declarations': [canonical(lex(d)) for d in declarations],
+            'reexports': [canonical(lex(d)) for d in re.findall(r'pub use\s+[^;]+;', facade)],
+            'generated_module': 'slint::include_modules!();' in facade}
 
 
-def foundation_ownership_findings() -> list[Finding]:
-    expected_locations = {
-        "ThemeMode": "ui/kit/foundation/theme.slint",
-        "Typography": "ui/kit/foundation/theme.slint",
-        "Motion": "ui/kit/foundation/theme.slint",
-        "Theme": "ui/kit/foundation/theme.slint",
-        "Elevation": "ui/kit/foundation/theme.slint",
-        "UiConstants": "ui/kit/foundation/constants.slint",
-        "FluentIcons": "ui/kit/foundation/fluent_icons.slint",
-        "Branding": "ui/kit/foundation/branding.slint",
-    }
-    definitions: dict[str, list[dict[str, object]]] = {}
-    for path in slint_files(UI_ROOT):
-        for definition in exported_definitions(path):
-            definitions.setdefault(str(definition["name"]), []).append(definition)
-
-    findings: list[Finding] = []
-    for name, expected_file in expected_locations.items():
-        actual = definitions.get(name, [])
-        locations = [str(item["file"]) for item in actual]
-        if locations != [expected_file]:
-            findings.append(
-                Finding(
-                    "FND001",
-                    name,
-                    f"canonical Foundation definition must be only in {expected_file}; found {locations}",
-                )
-            )
-
-    fluent = definitions.get("FluentIcons", [])
-    if fluent and any("app_mark" in str(item) for item in fluent[0]["api"]):
-        findings.append(
-            Finding("FND002", str(fluent[0]["file"]), "FluentIcons must not expose Branding.app_mark")
-        )
-
-    return findings
+def check_baseline(actual, expected):
+    if actual != expected:
+        delta = '\n'.join(difflib.unified_diff(json.dumps(expected, indent=2, sort_keys=True).splitlines(), json.dumps(actual, indent=2, sort_keys=True).splitlines(), fromfile='reviewed baseline', tofile='current', lineterm=''))
+        raise ContractError('Product contract changed; explicit review required:\n' + delta)
 
 
-def primitive_ownership_findings() -> list[Finding]:
-    expected_locations = {
-        "FluentIcon": "ui/kit/primitives/fluent_icon.slint",
-        "TooltipHost": "ui/kit/primitives/tooltip_host.slint",
-        "SurfaceCard": "ui/kit/primitives/surface_card.slint",
-        "BadgeKind": "ui/kit/primitives/badge.slint",
-        "Badge": "ui/kit/primitives/badge.slint",
-        "FluentButton": "ui/kit/primitives/fluent_button.slint",
-        "IconButton": "ui/kit/primitives/icon_button.slint",
-        "SegmentButton": "ui/kit/primitives/segment_button.slint",
-        "FluentTextField": "ui/kit/primitives/text_field.slint",
-        "FluentTextArea": "ui/kit/primitives/text_area.slint",
-    }
-    definitions: dict[str, list[str]] = {}
-    for path in slint_files(UI_ROOT):
-        for definition in exported_definitions(path):
-            definitions.setdefault(str(definition["name"]), []).append(
-                str(definition["file"])
-            )
-
-    findings: list[Finding] = []
-    for name, expected_file in expected_locations.items():
-        locations = definitions.get(name, [])
-        if locations != [expected_file]:
-            findings.append(
-                Finding(
-                    "PRM001",
-                    name,
-                    f"canonical Primitive definition must be only in {expected_file}; found {locations}",
-                )
-            )
-
-    expected_reexports = {"ui/kit/kit.slint": set(expected_locations)}
-    for facade, expected_names in expected_reexports.items():
-        path = REPO_ROOT / facade
-        reexports: set[str] = set()
-        for names, _source in REEXPORT_RE.findall(path.read_text(encoding="utf-8")):
-            reexports.update(name.strip() for name in names.split(",") if name.strip())
-        missing = sorted(expected_names - reexports)
-        if missing:
-            findings.append(
-                Finding(
-                    "PRM002",
-                    facade,
-                    f"missing Primitive re-export(s): {', '.join(missing)}",
-                )
-            )
-
-    return findings
+def acyclic(graph):
+    active, done = [], set()
+    def visit(node):
+        if node in active:
+            raise ContractError('Product import cycle: ' + ' -> '.join(map(str, active + [node])))
+        if node in done:
+            return
+        active.append(node)
+        for edge in graph.get(node, []):
+            visit(edge)
+        active.pop()
+        done.add(node)
+    for node in graph:
+        visit(node)
 
 
-def pattern_overlay_ownership_findings() -> list[Finding]:
-    expected_locations = {
-        "SettingRow": "ui/kit/patterns/settings/setting_row.slint",
-        "TaskRowShell": "ui/kit/patterns/tasks/task_row_shell.slint",
-        "InboxItem": "ui/kit/patterns/tasks/inbox/inbox_types.slint",
-        "InboxPane": "ui/kit/patterns/tasks/inbox/inbox_pane.slint",
-        "SidebarItem": "ui/kit/patterns/navigation/sidebar_item.slint",
-        "WindowControlButton": "ui/kit/patterns/window/window_control_button.slint",
-        "SectionHeader": "ui/kit/patterns/page/section_header.slint",
-        "PageHeader": "ui/kit/patterns/page/page_header.slint",
-        "EmptyState": "ui/kit/patterns/page/empty_state.slint",
-        "MetricCard": "ui/kit/patterns/page/metric_card.slint",
-        "ToastKind": "ui/kit/overlays/toast.slint",
-        "ToastHost": "ui/kit/overlays/toast.slint",
-        "ModalKind": "ui/kit/overlays/modal.slint",
-        "ModalManager": "ui/kit/overlays/modal.slint",
-    }
-    definitions: dict[str, list[str]] = {}
-    for path in slint_files(UI_ROOT):
-        for definition in exported_definitions(path):
-            definitions.setdefault(str(definition["name"]), []).append(
-                str(definition["file"])
-            )
-
-    findings: list[Finding] = []
-    for name, expected_file in expected_locations.items():
-        locations = definitions.get(name, [])
-        if locations != [expected_file]:
-            findings.append(
-                Finding(
-                    "PAT001",
-                    name,
-                    f"canonical Pattern/Overlay definition must be only in {expected_file}; found {locations}",
-                )
-            )
-
-    expected_reexports = {"ui/kit/kit.slint": set(expected_locations)}
-    for facade, expected_names in expected_reexports.items():
-        path = REPO_ROOT / facade
-        reexports: set[str] = set()
-        for names, _source in REEXPORT_RE.findall(path.read_text(encoding="utf-8")):
-            reexports.update(name.strip() for name in names.split(",") if name.strip())
-        missing = sorted(expected_names - reexports)
-        if missing:
-            findings.append(
-                Finding(
-                    "PAT002",
-                    facade,
-                    f"missing Pattern/Overlay re-export(s): {', '.join(missing)}",
-                )
-            )
-
-    return findings
-
-
-def kit_import_findings() -> list[Finding]:
-    kit_root = UI_ROOT / "kit"
-    findings: list[Finding] = []
-    for path in slint_files(kit_root):
-        for source, target in import_targets(path):
-            if target is not None and not is_within(target, kit_root):
-                findings.append(
-                    Finding("KIT001", relative(path), f'Kit import leaves ui/kit: "{source}"')
-                )
-    return findings
-
-
-def kit_layer_findings() -> list[Finding]:
-    kit_root = UI_ROOT / "kit"
-
-    def layer(path: Path) -> int | None:
-        relative_parts = path.resolve().relative_to(kit_root.resolve()).parts
-        if not relative_parts:
-            return None
-        return {
-            "foundation": 0,
-            "primitives": 1,
-            "patterns": 2,
-            "overlays": 2,
-        }.get(relative_parts[0])
-
-    findings: list[Finding] = []
-    for path in slint_files(kit_root):
-        source_layer = layer(path)
-        if source_layer is None:
-            continue
-        for source, target in import_targets(path):
-            if target is None or not is_within(target, kit_root):
+def check_ui(root, reference):
+    for name in REMOVED:
+        if (root / name).exists():
+            raise ContractError(f'Embedded Kit/Gallery still present: {name}')
+    graph, assets, symbols = {}, set(), {}
+    for path in files(root, '*.slint'):
+        if not path.is_relative_to(root / 'ui'):
+            raise ContractError(f'Slint source outside Product UI: {path}')
+        text = path.read_text(encoding='utf-8')
+        try:
+            module = parse(text)
+        except ContractError as error:
+            raise ContractError(f'{path}: {error}') from error
+        if 'SPDX-License-Identifier: GPL-3.0-only' not in text[:1500] or 'SPDX-FileCopyrightText:' not in text[:1500]:
+            raise ContractError(f'Missing Product attribution: {path}')
+        for name, fingerprint in fingerprint_definitions(text):
+            if name in reference['public_names'] or fingerprint in reference['definition_fingerprints']:
+                raise ContractError(f'Copied/renamed Kit implementation in {path}: {name}')
+            if name in module['exports']:
+                if name in symbols:
+                    raise ContractError(f'Duplicate Product definition: {name}')
+                symbols[name] = path
+        graph[path] = []
+        for source, aliases in module['imports']:
+            if source == 'std-widgets.slint':
                 continue
-            target_layer = layer(target)
-            if target == (kit_root / "kit.slint").resolve():
-                findings.append(
-                    Finding(
-                        "KIT002",
-                        relative(path),
-                        f'Kit implementation imports its public barrel: "{source}"',
-                    )
-                )
-            elif target_layer is not None and target_layer > source_layer:
-                findings.append(
-                    Finding(
-                        "KIT003",
-                        relative(path),
-                        f'Kit layer imports a higher layer: "{source}"',
-                    )
-                )
-    return findings
-
-
-def migration_scaffold_findings() -> list[Finding]:
-    obsolete_paths = (
-        UI_ROOT / "theme.slint",
-        UI_ROOT / "constants.slint",
-        UI_ROOT / "icons.slint",
-        UI_ROOT / "components" / "common.slint",
-        UI_ROOT / "components" / "icon.slint",
-        UI_ROOT / "components" / "page_shell.slint",
-        UI_ROOT / "components" / "toast.slint",
-        UI_ROOT / "components" / "modal_manager.slint",
-        UI_ROOT / "dev" / "design_gallery.slint",
-        CRATES_ROOT / "quadrant-ui" / "examples" / "design_gallery.rs",
-    )
-    return [
-        Finding("MIG001", relative(path), "obsolete migration facade/example still exists")
-        for path in obsolete_paths
-        if path.exists()
-    ]
-
-
-def gallery_import_findings() -> list[Finding]:
-    gallery_root = UI_ROOT / "gallery"
-    kit_public = (UI_ROOT / "kit" / "kit.slint").resolve()
-    findings: list[Finding] = []
-    for path in slint_files(gallery_root):
-        for source, target in import_targets(path):
-            if target is None or is_within(target, gallery_root) or target == kit_public:
+            if source == '@quadrant-kit':
+                if any(name not in reference['public_names'] for name, _ in aliases):
+                    raise ContractError(f'Unknown Kit public name: {path}')
                 continue
-            findings.append(
-                Finding(
-                    "GAL001",
-                    relative(path),
-                    f'Gallery import bypasses kit.slint or enters Product UI: "{source}"',
-                )
-            )
+            target = local_path(path, source, root / 'ui')
+            if target.suffix != '.slint':
+                raise ContractError(f'Invalid Product import: {path}: {source}')
+            if path.is_relative_to(root / 'ui/product') and not target.is_relative_to(root / 'ui/product'):
+                raise ContractError('Product semantic layer depends on view/component')
+            graph[path].append(target)
+        for source in images(text):
+            target = local_path(path, source, root)
+            if not target.is_relative_to(root / 'assets'):
+                raise ContractError(f'Static resource outside owned assets: {path}')
+            assets.add(target.relative_to(root).as_posix())
+    acyclic(graph)
+    entry = parse((root / 'ui/app.slint').read_text(encoding='utf-8'))
+    for name in ('MainWindow', 'QuickAddWindow', 'TaskEditorWindow'):
+        if name not in entry['exports']:
+            raise ContractError(f'Missing generated window: {name}')
+    manifest = json.loads((root / 'scripts/product_assets_v1.json').read_text(encoding='utf-8'))
+    recorded = set()
+    for asset in manifest['assets']:
+        path = (root / asset['path']).resolve()
+        if not path.is_relative_to(root / 'assets/icons') or asset['path'] in recorded:
+            raise ContractError('Invalid/duplicate Product asset record')
+        if asset['spdx_license'] != 'MIT' or hashlib.sha256(path.read_bytes()).hexdigest() != asset['sha256']:
+            raise ContractError(f'Product asset hash/license changed: {asset["path"]}')
+        recorded.add(asset['path'])
+    if {p for p in assets if p.startswith('assets/icons/')} != recorded:
+        raise ContractError('Product icon closure differs from manifest')
+    if {p.relative_to(root).as_posix() for p in (root / 'assets/icons').glob('*.svg')} != recorded:
+        raise ContractError('Unowned/generic icon copies remain in Tasks')
+    if 'Permission is hereby granted' not in (root / 'assets/icons/LICENSE-MIT').read_text(encoding='utf-8'):
+        raise ContractError('Missing original icon MIT license')
+    return {'product_exports': len(symbols), 'static_assets': len(assets)}
 
-    legacy_gallery = UI_ROOT / "dev" / "design_gallery.slint"
-    if legacy_gallery.exists():
-        for source, target in import_targets(legacy_gallery):
-            if (
-                target is None
-                or target == kit_public
-                or is_within(target, legacy_gallery.parent)
-                or is_within(target, gallery_root)
-            ):
-                continue
-            findings.append(
-                Finding(
-                    "GAL000",
-                    relative(legacy_gallery),
-                    f'legacy Gallery still imports pre-Kit path "{source}"',
-                )
-            )
-    return findings
+
+def dependencies(manifest):
+    for kind in ('dependencies', 'build-dependencies', 'dev-dependencies'):
+        for alias, value in manifest.get(kind, {}).items():
+            yield kind, alias, value
+    for table in manifest.get('target', {}).values():
+        yield from dependencies(table)
 
 
-def product_gallery_findings() -> list[Finding]:
-    product_files = [UI_ROOT / "app.slint", *slint_files(UI_ROOT / "views")]
-    product_files.extend(slint_files(UI_ROOT / "components"))
-    findings: list[Finding] = []
-    for path in product_files:
-        if not path.exists():
+def check_manifest(manifest, workspace):
+    if manifest.get('patch') or manifest.get('replace'):
+        raise ContractError('Cargo patch/replace is forbidden')
+    found = 0
+    for kind, alias, value in dependencies(manifest):
+        value = {'version': value} if isinstance(value, str) else dict(value)
+        if value.get('workspace'):
+            inherited = workspace.get('dependencies', {}).get(alias)
+            if inherited is None:
+                raise ContractError(f'Unknown inherited dependency: {alias}')
+            inherited = {'version': inherited} if isinstance(inherited, str) else inherited
+            value = {**inherited, **value}
+        name = value.get('package', alias)
+        if name == 'quadrant-ui-gallery':
+            raise ContractError('Removed Gallery dependency')
+        if name == 'quadrant-kit':
+            found += 1
+            if value.get('git') != KIT_URL or value.get('rev') != KIT_REV or any(k in value for k in ('path', 'branch', 'tag', 'registry')):
+                raise ContractError(f'Kit must use verified public Git + full SHA: {alias}')
+            owner = manifest.get('package', {}).get('name')
+            if owner and (owner != 'quadrant-ui' or kind != 'build-dependencies'):
+                raise ContractError('Kit is only a quadrant-ui build dependency')
+    return found
+
+
+def check_config(config):
+    if any(config.get(key) for key in ('patch', 'replace', 'paths', 'source')):
+        raise ContractError('Cargo source override/replacement detected')
+    if any(name.startswith(('SLINT_INCLUDE', 'SLINT_LIBRARY')) for name in config.get('env', {})):
+        raise ContractError('Cargo env overrides Slint discovery')
+    if any(k in config.get('build', {}) for k in ('rustc', 'rustc-wrapper', 'rustc-workspace-wrapper')):
+        raise ContractError('Compiler wrapper requires separate source review')
+
+
+def check_manifests(root):
+    workspace = tomllib.loads((root / 'Cargo.toml').read_text(encoding='utf-8'))['workspace']
+    check_manifest({'dependencies': workspace.get('dependencies', {})}, workspace)
+    count = sum(check_manifest(tomllib.loads(p.read_text(encoding='utf-8')), workspace) for p in files(root, 'Cargo.toml'))
+    if count != 1:
+        raise ContractError('Expected one effective Product Kit dependency')
+    configs = {directory / '.cargo' / name for directory in (root, *root.parents) for name in ('config', 'config.toml')}
+    cargo_home = Path(os.environ.get('CARGO_HOME', Path.home() / '.cargo'))
+    configs.update(cargo_home / name for name in ('config', 'config.toml'))
+    configs.update(p for p in files(root, 'config*') if p.parent.name == '.cargo')
+    for config in configs:
+        if config.is_file():
+            check_config(tomllib.loads(config.read_text(encoding='utf-8')))
+    if any(k.startswith(('SLINT_INCLUDE', 'SLINT_LIBRARY')) for k in os.environ):
+        raise ContractError('Environment overrides Slint discovery')
+
+
+def reachable(metadata, initial, kinds):
+    nodes = {n['id']: n for n in metadata['resolve']['nodes']}
+    visited, pending = set(), [initial]
+    while pending:
+        current = pending.pop()
+        if current in visited:
             continue
-        for source, target in import_targets(path):
-            if target is not None and (
-                is_within(target, UI_ROOT / "gallery") or is_within(target, UI_ROOT / "dev")
-            ):
-                findings.append(
-                    Finding(
-                        "PROD001",
-                        relative(path),
-                        f'Product UI references Gallery: "{source}"',
-                    )
-                )
-    return findings
+        visited.add(current)
+        for edge in nodes[current]['deps']:
+            if any(k['kind'] in kinds for k in edge['dep_kinds']):
+                pending.append(edge['pkg'])
+    return visited - {initial}
 
 
-def product_kit_import_findings() -> list[Finding]:
-    compatibility_facades = {
-        (UI_ROOT / "theme.slint").resolve(),
-        (UI_ROOT / "constants.slint").resolve(),
-        (UI_ROOT / "icons.slint").resolve(),
-        (UI_ROOT / "components" / "common.slint").resolve(),
-        (UI_ROOT / "components" / "icon.slint").resolve(),
-        (UI_ROOT / "components" / "page_shell.slint").resolve(),
-        (UI_ROOT / "components" / "toast.slint").resolve(),
-        (UI_ROOT / "components" / "modal_manager.slint").resolve(),
-    }
-    product_files = [UI_ROOT / "app.slint", *slint_files(UI_ROOT / "views")]
-    product_files.extend(
-        path
-        for path in slint_files(UI_ROOT / "components")
-        if path.resolve() not in compatibility_facades
-    )
-    kit_root = UI_ROOT / "kit"
-    kit_public = (kit_root / "kit.slint").resolve()
-
-    findings: list[Finding] = []
-    for path in product_files:
-        for source, target in import_targets(path):
-            if target in compatibility_facades:
-                findings.append(
-                    Finding(
-                        "PROD002",
-                        relative(path),
-                        f'Product still imports compatibility facade: "{source}"',
-                    )
-                )
-            elif target is not None and is_within(target, kit_root) and target != kit_public:
-                findings.append(
-                    Finding(
-                        "PROD003",
-                        relative(path),
-                        f'Product bypasses kit.slint: "{source}"',
-                    )
-                )
-    return findings
+def check_metadata(metadata, root):
+    packages = {p['id']: p for p in metadata['packages']}
+    kit = [p for p in packages.values() if p['name'] == 'quadrant-kit']
+    if len(kit) != 1 or kit[0].get('source') != f'git+{KIT_URL}?rev={KIT_REV}#{KIT_REV}':
+        raise ContractError('Actual Kit source differs from verified remote commit')
+    kit_path = Path(kit[0]['manifest_path']).resolve()
+    cargo_home = Path(os.environ.get('CARGO_HOME', Path.home() / '.cargo')).resolve()
+    if not kit_path.is_relative_to(cargo_home / 'git/checkouts') or kit_path.is_relative_to(root.resolve()):
+        raise ContractError('Kit source is not in Cargo fetched Git storage')
+    if reachable(metadata, kit[0]['id'], (None,)):
+        raise ContractError('Kit helper acquired runtime dependencies')
+    by_name = {p['name']: p for p in packages.values() if p['id'] in metadata['workspace_members']}
+    incoming = [(node['id'], kind['kind']) for node in metadata['resolve']['nodes']
+                for edge in node['deps'] if edge['pkg'] == kit[0]['id']
+                for kind in edge['dep_kinds']]
+    if incoming != [(by_name['quadrant-ui']['id'], 'build')]:
+        raise ContractError('Resolved Kit edge must be exclusively quadrant-ui build')
+    if 'quadrant-ui-gallery' in by_name:
+        raise ContractError('Gallery remains a workspace member')
+    for name in ('quadrant-agent', 'quadrant-app', 'quadrant-ui'):
+        kinds = (None, 'build', 'dev') if name == 'quadrant-agent' else (None,)
+        for dependency in reachable(metadata, by_name[name]['id'], kinds):
+            dep = packages[dependency]['name']
+            bad_agent = dep in ('quadrant-ui', 'quadrant-kit', 'slint', 'slint-build', 'winit', 'femtovg', 'skia-safe') or dep.startswith('i-slint-')
+            bad_gui = dep in ('quadrant-storage', 'rusqlite', 'quadrant-agent', 'quadrant-kit')
+            if (name == 'quadrant-agent' and bad_agent) or (name != 'quadrant-agent' and bad_gui):
+                raise ContractError(f'Resolved {name} dependency path reaches {dep}')
+    for package in packages.values():
+        if package['name'] in ('slint', 'slint-build') and package['version'] != '1.17.1':
+            raise ContractError('Unexpected resolved Slint version')
+    return {'kit_source': kit[0]['source'], 'kit_manifest': str(kit_path)}
 
 
-def cargo_dependency_names(path: Path) -> set[str]:
-    names: set[str] = set()
-    section = ""
-    dependency_section = re.compile(
-        r"^(?:target\..+\.)?(dependencies|dev-dependencies|build-dependencies)$"
-    )
-    for raw_line in path.read_text(encoding="utf-8").splitlines():
-        line = raw_line.split("#", 1)[0].strip()
-        if line.startswith("[") and line.endswith("]"):
-            section = line.strip("[]")
-            continue
-        if dependency_section.match(section):
-            match = re.match(r'([A-Za-z0-9_-]+)\s*=\s*', line)
-            if match:
-                names.add(match.group(1))
-    return names
+def check(root=ROOT, metadata=True, target=None):
+    reference = json.loads((root / 'scripts/kit_source_v1.json').read_text(encoding='utf-8'))
+    check_baseline(reference['rev'], KIT_REV)
+    result = check_ui(root, reference)
+    baseline = json.loads((root / 'scripts/product_ui_api_v1.json').read_text(encoding='utf-8'))
+    check_baseline(product_api(root), baseline['exports'])
+    check_baseline(rust_host_api(root), baseline['rust_host'])
+    check_baseline(canonical(lex((root / 'crates/quadrant-ui/build.rs').read_text(encoding='utf-8'))), baseline['build_contract'])
+    check_manifests(root)
+    if metadata:
+        host = target or next(line.split(': ', 1)[1] for line in subprocess.check_output(['rustc', '-vV'], cwd=root, text=True).splitlines() if line.startswith('host: '))
+        data = json.loads(subprocess.check_output(['cargo', 'metadata', '--locked', '--format-version', '1', '--filter-platform', host], cwd=root, text=True, encoding='utf-8'))
+        result.update(check_metadata(data, root))
+        result['target'] = host
+    return result
 
 
-def cargo_findings() -> list[Finding]:
-    findings: list[Finding] = []
-    gallery_manifest = CRATES_ROOT / "quadrant-ui-gallery" / "Cargo.toml"
-    forbidden_gallery_dependencies = {
-        "quadrant-domain",
-        "quadrant-application",
-        "quadrant-storage",
-        "quadrant-platform",
-        "quadrant-ui",
-    }
-    if gallery_manifest.exists():
-        forbidden = sorted(cargo_dependency_names(gallery_manifest) & forbidden_gallery_dependencies)
-        if forbidden:
-            findings.append(
-                Finding(
-                    "CAR001",
-                    relative(gallery_manifest),
-                    f"Gallery crate depends on forbidden Quadrant crates: {', '.join(forbidden)}",
-                )
-            )
-
-    for manifest in sorted(CRATES_ROOT.glob("*/Cargo.toml")):
-        if manifest == gallery_manifest:
-            continue
-        if "quadrant-ui-gallery" in cargo_dependency_names(manifest):
-            findings.append(
-                Finding(
-                    "CAR002",
-                    relative(manifest),
-                    "Product crate depends on quadrant-ui-gallery",
-                )
-            )
-    process_rules = {
-        "quadrant-app": {"quadrant-storage", "rusqlite", "quadrant-agent"},
-        "quadrant-ui": {"quadrant-storage", "rusqlite", "quadrant-platform", "quadrant-agent"},
-        "quadrant-agent": {"quadrant-ui", "slint", "slint-build", "winit", "femtovg", "skia-safe"},
-    }
-    for crate, forbidden_names in process_rules.items():
-        manifest = CRATES_ROOT / crate / "Cargo.toml"
-        if manifest.exists():
-            forbidden = sorted(cargo_dependency_names(manifest) & forbidden_names)
-            if forbidden:
-                findings.append(Finding("CAR003", relative(manifest),
-                                        f"Process ownership boundary violated: {', '.join(forbidden)}"))
-    return findings
-
-
-def spdx_findings() -> list[Finding]:
-    findings: list[Finding] = []
-    for root in (UI_ROOT / "kit", UI_ROOT / "gallery"):
-        for path in slint_files(root):
-            header = "\n".join(path.read_text(encoding="utf-8").splitlines()[:12])
-            if "SPDX-License-Identifier:" not in header:
-                findings.append(
-                    Finding("LIC001", relative(path), "Kit/Gallery Slint file has no SPDX header")
-                )
-    return findings
-
-
-def main() -> int:
-    checks = [
-        ("Migration scaffolding", migration_scaffold_findings),
-        ("Frozen public API", frozen_api_findings),
-        ("Duplicate exports", duplicate_export_findings),
-        ("Foundation ownership", foundation_ownership_findings),
-        ("Primitive ownership", primitive_ownership_findings),
-        ("Pattern/Overlay ownership", pattern_overlay_ownership_findings),
-        ("Kit imports", kit_import_findings),
-        ("Kit layer direction", kit_layer_findings),
-        ("Gallery imports", gallery_import_findings),
-        ("Product Kit imports", product_kit_import_findings),
-        ("Product/Gallery separation", product_gallery_findings),
-        ("Cargo dependencies", cargo_findings),
-        ("SPDX headers", spdx_findings),
-    ]
-    all_findings: list[Finding] = []
-    print("Quadrant UI boundary audit (enforced mode; enabled in Stage 9)")
-    for title, check in checks:
-        findings = check()
-        all_findings.extend(findings)
-        print(f"\n{title}: {'OK' if not findings else f'{len(findings)} finding(s)'}")
-        for finding in findings:
-            print(f"  [{finding.code}] {finding.location}: {finding.message}")
-
-    if all_findings:
-        print(f"\nFAILED: {len(all_findings)} boundary finding(s).")
-        return 1
-    print("\nPASSED: 0 boundary findings.")
-    return 0
-
-
-if __name__ == "__main__":
-    raise SystemExit(main())
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--target', help='Target triple for resolved dependency graph filtering')
+    args = parser.parse_args()
+    try:
+        print(json.dumps(check(target=args.target), indent=2))
+    except (ValueError, OSError, subprocess.SubprocessError, KeyError) as error:
+        print(f'Boundary check failed: {error}', file=sys.stderr)
+        sys.exit(1)

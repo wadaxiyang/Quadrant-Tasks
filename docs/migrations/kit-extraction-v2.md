@@ -218,3 +218,65 @@ Local Kit evidence is under ignored `target/phase3/`: the initial and successful
 ### Handoff
 
 Kit `main` and `codex/extraction-candidate` point to the qualified commit; the protected annotated tag retains it. Tasks still uses its original embedded Kit/Gallery, manifests, lockfile and guard. Phase 3 changed only this Tasks ledger. No Product switch, embedded source deletion, stable release or final parent/two-child directory relocation was performed. Phase 4 can now use the actual verified Git+SHA dependency and proceed with its own controlled cutover/regression gates.
+
+## Phase 4 — Controlled Product cutover (2026-09-06)
+
+The complete integration is on `codex/kit-product-cutover`. The pre-cutover
+Tasks commit is `d2b423d4b7f557116f6fe655dcc67aac60db2d7f`, retained locally by
+`pre-kit-cutover-20260906`. Kit remains unchanged at the Gate 3 qualified commit
+`838ecfbead2d0a1966907ddd742cb6f34516d3f6` and its protected candidate tag.
+
+### Atomic source and contract changes
+
+- Migrated Branding, InboxItem, InboxPane and TaskRowShell into Product before
+  deleting the old embedded Kit/Gallery trees, Gallery crate and capture script.
+  Tasks now has eight workspace crates. No generic Slint implementation is copied
+  into another Tasks directory.
+- Added Product quadrant colors, timer typography, Focus breakpoint and eleven
+  icon aliases. They retain original values/asset bytes; quadrant colors use the
+  same imported Theme.dark_mode. Thirty-two Kit-owned icon copies were removed;
+  Product icons, native branding and the original MIT text remain.
+- quadrant-ui alone has the public Git+full-SHA Kit build dependency. build.rs
+  maps the returned facade file to @quadrant-kit and embeds resources with
+  EmbedFiles. Window/model Rust types are still generated inside quadrant-ui.
+- Compared all 23 original Product exports before deletion against the new
+  scanner: signatures and defaults match except Branding's relocated relative
+  image path, which resolves to the same unchanged SVG. Four Product semantic
+  globals are added. GuiShell/UiShell Rust implementations and public interfaces,
+  Agent/business/storage code, profile identity and protocol are unchanged.
+- Reviewed Cargo.lock: only adds quadrant-kit 0.1.0 at the qualified source,
+  adds its UI build edge and removes quadrant-ui-gallery. No registry package
+  version changed. The workspace png dependency remains required by UI probes.
+- Replaced the old mixed baseline with reviewed Product API, Kit source/copy
+  fingerprints and Product asset manifests. The guard retains import/cycle/API/
+  attribution checks and verifies source overrides, actual Git storage/source,
+  exclusive UI build ownership, Agent build/dev/transitive isolation and GUI
+  normal dependency isolation. Sixteen Python fixtures cover failure cases.
+- Updated README and public UI architecture guidance, three packaging scripts
+  and third-party notices. Packages include the original Fluent MIT text.
+  CI runs on push/PR with pinned toolchains, target-filtered source checks,
+  Windows/macOS native builds and an actual Windows Rust 1.92 build. Release
+  verification compares the existing tag's peeled commit to the selected source
+  and passes that exact SHA to every packaging job. No release was triggered.
+
+### Local integration evidence before CI
+
+Windows MSVC Rust/Cargo 1.94.1: locked workspace/all-targets check, fmt, clippy
+all-targets/all-features with warnings denied, the synthetic three-window probe
+and the repeated full workspace test run pass. The full run reports **125
+passed, 0 failed, 1 ignored** (the existing real Windows notification smoke).
+Main/Quick Add/Task Editor were captured and visually reviewed in Light and Dark
+with winit-software; all six images contain the expected controls and assets.
+These probes never start Agent or access a database.
+
+The first full test run terminated the IPC integration binary with Windows
+STATUS_HEAP_CORRUPTION after seven tests. A targeted 12-test rerun, five repeats
+of the exact original test binary and the subsequent entire workspace run all
+pass. No test was disabled or serialized. This intermittent failure is retained
+as an unresolved diagnostic for Phase 5 stress regression, not attributed to
+Kit: Agent sources and its resolved dependencies were not changed.
+
+Private command logs, pre-cutover contracts, lock review and native screenshots
+are under ignored target/phase4. Final optimized build and same-commit hosted CI
+results will be recorded below before declaring Gate 4. Phase 5 package/business
+regression and Phase 6 directory relocation have not been performed.

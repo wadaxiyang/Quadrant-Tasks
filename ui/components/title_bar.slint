@@ -6,17 +6,8 @@
 // 948589a255a4bd8a3ff9c3de49e2e13109378fcd. Product-specific mail/pin actions
 // and Segoe icon glyphs were removed; theme selection is tri-state.
 
-import {
-    Branding,
-    FluentIcon,
-    FluentIcons as Icons,
-    IconButton,
-    Theme,
-    ThemeMode,
-    Typography,
-    UiConstants,
-    WindowControlButton,
-} from "../kit/kit.slint";
+import { Branding } from "../product/branding.slint";
+import { FluentIcon, FluentIcons as Icons, IconButton, Theme, ThemeMode, Typography, UiConstants, WindowControlButton } from "@quadrant-kit";
 
 component ThemeModeControl inherits IconButton {
     in property <ThemeMode> mode: ThemeMode.system;

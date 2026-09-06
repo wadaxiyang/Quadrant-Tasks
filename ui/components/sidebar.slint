@@ -5,16 +5,8 @@
 // Derived from wsl-dashboard src/ui/components/sidebar.slint at
 // 948589a255a4bd8a3ff9c3de49e2e13109378fcd; navigation and icons adapted for Quadrant.
 
-import {
-    FluentIcon,
-    FluentIcons as Icons,
-    Motion,
-    SidebarItem,
-    Theme,
-    TooltipHost,
-    Typography,
-    UiConstants,
-} from "../kit/kit.slint";
+import { ProductIcons } from "../product/product_icons.slint";
+import { FluentIcon, FluentIcons as Icons, Motion, SidebarItem, Theme, TooltipHost, Typography, UiConstants } from "@quadrant-kit";
 
 export component Sidebar inherits Rectangle {
     in-out property <bool> collapsed: false;
@@ -163,8 +155,8 @@ export component Sidebar inherits Rectangle {
         }
 
         SidebarItem {
-            icon: Icons.quadrants_regular;
-            selected_icon: Icons.quadrants_filled;
+            icon: ProductIcons.quadrants_regular;
+            selected_icon: ProductIcons.quadrants_filled;
             text: "Quadrants";
             selected: root.selected_route == 0;
             collapsed: root.effective_collapsed;
@@ -172,8 +164,8 @@ export component Sidebar inherits Rectangle {
         }
 
         SidebarItem {
-            icon: Icons.today_regular;
-            selected_icon: Icons.today_filled;
+            icon: ProductIcons.today_regular;
+            selected_icon: ProductIcons.today_filled;
             text: "Today";
             selected: root.selected_route == 1;
             collapsed: root.effective_collapsed;
@@ -181,8 +173,8 @@ export component Sidebar inherits Rectangle {
         }
 
         SidebarItem {
-            icon: Icons.focus_regular;
-            selected_icon: Icons.focus_filled;
+            icon: ProductIcons.focus_regular;
+            selected_icon: ProductIcons.focus_filled;
             text: "Focus";
             selected: root.selected_route == 2;
             collapsed: root.effective_collapsed;
@@ -190,8 +182,8 @@ export component Sidebar inherits Rectangle {
         }
 
         SidebarItem {
-            icon: Icons.review_regular;
-            selected_icon: Icons.review_filled;
+            icon: ProductIcons.review_regular;
+            selected_icon: ProductIcons.review_filled;
             text: "Review";
             selected: root.selected_route == 3;
             collapsed: root.effective_collapsed;
@@ -201,8 +193,8 @@ export component Sidebar inherits Rectangle {
         Rectangle { vertical-stretch: 1; }
 
         SidebarItem {
-            icon: Icons.completed_regular;
-            selected_icon: Icons.completed_filled;
+            icon: ProductIcons.completed_regular;
+            selected_icon: ProductIcons.completed_filled;
             text: "Completed";
             selected: root.selected_route == 4;
             collapsed: root.effective_collapsed;

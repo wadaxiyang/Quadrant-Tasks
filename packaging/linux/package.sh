@@ -2,6 +2,7 @@
 set -eu
 
 repository=$(CDPATH= cd -- "$(dirname -- "$0")/../.." && pwd)
+python3 "$repository/scripts/check_ui_boundaries.py"
 version=$(awk -F'"' '/^version = "/ { print $2; exit }' "$repository/Cargo.toml")
 target_root="$repository/target/package/linux"
 staging="$target_root/Quadrant-$version-linux-x86_64"
@@ -27,6 +28,7 @@ for size in 16 20 24 32 40 48 64 128 256 512; do
     cp "$repository/assets/branding/quadrant-$size.png" "$icon_dir/quadrant.png"
 done
 cp "$repository/LICENSE" "$staging/share/licenses/quadrant/"
+cp "$repository/assets/icons/LICENSE-MIT" "$staging/share/licenses/quadrant/LICENSE-Fluent-Icons.txt"
 cp "$repository/packaging/THIRD-PARTY-NOTICES.txt" "$staging/share/licenses/quadrant/"
 cp "$repository/packaging/DEPENDENCY-LICENSES.txt" "$staging/share/licenses/quadrant/"
 cp "$repository/README.md" "$staging/"

@@ -2,20 +2,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 import { ScrollView } from "std-widgets.slint";
-import {
-    Badge,
-    BadgeKind,
-    EmptyState,
-    FluentIcons as Icons,
-    IconButton,
-    PageHeader,
-    SectionHeader,
-    SurfaceCard,
-    TaskRowShell,
-    Theme,
-    Typography,
-    UiConstants,
-} from "../kit/kit.slint";
+import { Badge, BadgeKind, EmptyState, FluentIcons as Icons, IconButton, PageHeader, SectionHeader, SurfaceCard, Theme, Typography, UiConstants } from "@quadrant-kit";
+import { TaskRowShell } from "../components/task_row_shell.slint";
 
 export struct TodayTaskRow {
     id: string,

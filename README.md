@@ -48,31 +48,24 @@ For both optimized executables:
 cargo build --locked --release -p quadrant-agent -p quadrant-app
 ```
 
-The Fluent component Gallery is an independent development tool and is not part of
-the Product build:
-
-```console
-cargo run --locked -p quadrant-ui-gallery
-```
-
-Use `scripts/capture_gallery_baseline.ps1` to create its deterministic renderer
-snapshot smoke or matrix outputs.
+Shared Fluent controls and the Gallery live in the separate
+[Quadrant-Kit repository](https://github.com/wadaxiyang/Quadrant-Kit).
+Tasks builds against public Git commit
+`838ecfbead2d0a1966907ddd742cb6f34516d3f6` (retained source tag
+`candidate/extraction-838ecfbead2d`). Cargo fetches it automatically; no sibling
+checkout is required. Static UI resources are embedded into the GUI.
 
 The UI dependency guard is enforced and uses only the Python standard library:
 
 ```console
 python scripts/check_ui_boundaries.py
+python -m unittest discover -s scripts/tests -v
 ```
 
-It fails on public-API drift, duplicate component definitions, obsolete facade
-paths, invalid Kit/Gallery/Product imports, forbidden Cargo dependencies, or
-missing Slint SPDX headers.
-
-The Gallery provides keyboard-accessible catalog navigation, category filters,
-Light/Dark/System themes, Compact/Medium/Wide preview containers, live component
-properties, accessibility notes, and Kit-only code samples. Snapshot automation
-may select a routed page with `QUADRANT_GALLERY_PAGE=0..8` and a preview width with
-`QUADRANT_GALLERY_PREVIEW=0..2`.
+It fails on Product API drift, embedded Kit/Gallery copies, invalid imports,
+source overrides, forbidden Cargo dependencies, asset/license changes or missing
+Slint SPDX headers. See [UI architecture and validation](docs/UI_ARCHITECTURE.md)
+for ownership, toolchain requirements and packaging checks.
 
 Windows build outputs are `target/release/quadrant-agent.exe` and
 `target/release/quadrant-app.exe`. The scripts under `packaging/windows/`,
