@@ -311,3 +311,11 @@ with -D warnings also passes locally using the existing private Phase 2 SDK.
 Review also closed an import-scanner exclusion gap: Product imports cannot point
 into target, __pycache__ or .tmp-* directories. The regression fixture confirms
 that such sources cannot evade scanning. All **18 Python tests pass**.
+
+macOS all-targets compilation passed, then its newly enabled native tests exposed
+Darwin's long runner TMPDIR: the UUID test profile plus socket name exceeded
+sockaddr_un capacity. CI now sets TMPDIR=/tmp only for the macOS workspace-test
+step; all existing tests remain enabled and retain their unique isolated profile
+directories. The matching local command is documented. This changes neither
+production profile discovery nor socket identity. Linux's complete workspace
+test run passes locally after the lint corrections.

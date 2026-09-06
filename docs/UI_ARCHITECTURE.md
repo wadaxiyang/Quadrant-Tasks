@@ -31,6 +31,11 @@ cargo test --workspace --locked
 cargo build --locked --release -p quadrant-agent -p quadrant-app
 ```
 
+On macOS use `TMPDIR=/tmp cargo test --workspace --locked`. The native socket
+name includes the test profile path; Darwin's default long temporary directory
+can exceed sockaddr_un capacity. Tests still use their own UUID directories and
+never use the application profile. CI uses this short temporary root as well.
+
 The guard checks Product export signatures/defaults, imports and cycles, static
 asset ownership and MIT hashes, copied Kit declarations, build mapping, Cargo
 overrides and the actual target-filtered resolved source/dependency graph.

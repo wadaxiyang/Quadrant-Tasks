@@ -49,6 +49,10 @@ jobs:
       - run: python scripts/check_ui_boundaries.py
       - run: cargo check --workspace --all-targets --locked
       - run: cargo test --workspace --locked
+        env:
+          # Darwin's long runner TMPDIR exceeds sockaddr_un for UUID test profiles.
+          # Tests still create and remove only their own unique profile directories.
+          TMPDIR: ${{ runner.os == 'macOS' && '/tmp' || runner.temp }}
       - run: cargo build --locked -p quadrant-agent -p quadrant-app
       - name: Windows synthetic native windows
         if: runner.os == 'Windows'
