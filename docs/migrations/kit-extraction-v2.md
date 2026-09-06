@@ -340,3 +340,36 @@ The Darwin preflight now passes Agent startup and all 12 real IPC integration
 tests. One new permission fixture initially collided with another fixture's
 timestamp-based directory name on the runner's coarse clock. Added a process-local
 atomic sequence to the short fixture name; runtime endpoint naming is untouched.
+
+### Gate 4 acceptance
+
+**Gate 4: PASS.** The tested implementation commit is
+`dc5497433a8ccfc7db9603dfadebdd54637c9995`, on `codex/kit-product-cutover`.
+[CI run 34006175012](https://github.com/wadaxiyang/Quadrant-Tasks/actions/runs/34006175012)
+completed successfully at exactly that SHA; all four jobs passed. This acceptance
+entry is a subsequent documentation-only commit, not a change to the tested code.
+
+| Check | Result |
+|---|---|
+| Product contracts, owned assets, actual Git source and dependency graph | PASS on Windows, Linux and macOS; 27 Product exports, 12 static Product assets, one UI build-only Kit edge |
+| Python scanner/guard/checkout fixtures | PASS; 18 tests on each platform |
+| Linux quality | PASS: fmt, Clippy all-targets/all-features with -D warnings, workspace tests and both native binaries |
+| Windows native | PASS: Agent/transport preflight, all-targets check, workspace tests, both binaries and Light/Dark three-window smoke |
+| macOS native | PASS: Agent/transport preflight including socket permissions and authenticated roundtrip, all-targets check, workspace tests and both binaries |
+| Declared Rust minimum | PASS: actual Windows Rust 1.92.0 build of quadrant-agent and quadrant-app |
+| Local Windows final code | PASS: 125 tests, 0 failures, 1 existing notification smoke ignored; strict Clippy, all-targets and debug/release dual-binary builds |
+| Local Linux final code | PASS: 123 tests, 0 failures, 0 ignored; includes the three added Unix permission regressions |
+| Native UI assets | PASS: six final-commit Windows CI PNGs downloaded, hashed and byte-identical to the reviewed earlier CI images; local Light/Dark probes also reviewed |
+| Locked dependency review | PASS: approved Kit Git entry and UI build edge added, old Gallery removed; registry versions unchanged |
+
+The final CI JSON/full log, test summaries, native artifact manifest and PNGs are
+retained with the local phase checkpoint. Subsequent acceptance-ledger commits
+contain only this record; the final delivery identifies the actual final HEAD.
+Kit remains at `838ecfbead2d0a1966907ddd742cb6f34516d3f6` with its protected retained
+candidate tag. No source override or local Kit fallback was introduced.
+
+The initial Windows IPC heap-corruption event remains recorded above. It did not
+recur in targeted runs, five exact-binary repetitions, subsequent full local
+tests or successful hosted Windows tests; preserve it for Phase 5 stress checks.
+Phase 4 acceptance is not a claim that the Phase 5 package/dual-process/native
+business matrix or Phase 6 physical workspace relocation has been completed.
