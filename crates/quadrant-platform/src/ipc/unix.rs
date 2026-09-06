@@ -98,7 +98,10 @@ pub(super) fn verify_peer(stream: &Stream) -> io::Result<PeerIdentity> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::sync::atomic::{AtomicUsize, Ordering};
     use tokio::io::{AsyncReadExt, AsyncWriteExt};
+
+    static NEXT_PROFILE: AtomicUsize = AtomicUsize::new(0);
 
     struct Profile(PathBuf);
 
@@ -108,7 +111,9 @@ mod tests {
                 .duration_since(std::time::UNIX_EPOCH)
                 .unwrap()
                 .as_nanos();
-            let root = std::env::temp_dir().join(format!("q-ipc-{}-{nonce}", std::process::id()));
+            let serial = NEXT_PROFILE.fetch_add(1, Ordering::Relaxed);
+            let root =
+                std::env::temp_dir().join(format!("q-ipc-{}-{nonce}-{serial}", std::process::id()));
             fs::create_dir(&root).unwrap();
             Self(root)
         }

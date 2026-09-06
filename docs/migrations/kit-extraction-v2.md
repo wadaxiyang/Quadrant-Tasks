@@ -335,3 +335,8 @@ and preservation of non-socket files at the endpoint path. They and the Agent
 tests pass on Linux, with strict platform/Agent Clippy. Native CI now runs this
 transport/Agent preflight before compiling the large Product UI, so transport
 failures are reported early. The final macOS result remains a required gate.
+
+The Darwin preflight now passes Agent startup and all 12 real IPC integration
+tests. One new permission fixture initially collided with another fixture's
+timestamp-based directory name on the runner's coarse clock. Added a process-local
+atomic sequence to the short fixture name; runtime endpoint naming is untouched.
