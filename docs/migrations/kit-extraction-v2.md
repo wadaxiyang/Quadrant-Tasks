@@ -637,3 +637,59 @@ directories. Full-repository movement will run from their external parent;
 an active-session lock must produce `LAYOUT_PENDING`, not a forced copy or
 reinitialized repository. Final movement/build results are recorded separately
 after execution; preparation alone does not establish Gate 6.
+
+### Bootstrap platform corrections
+
+The first hosted run exposed two real platform path differences: macOS's
+standard `/var` ancestor alias and Windows's short temporary-directory name.
+Bootstrap now canonicalizes ancestor aliases before checking repository and
+ancestor ownership, while still rejecting a linked workspace root, child root
+or output path. The Windows fixture compares against the canonical path rather
+than its short spelling. A ninth bootstrap fixture verifies an ancestor alias
+resolves to the intended, verified directory without writing in dry-run mode.
+
+At `da4d6741f4ea965491f6e25326391ecce410997f`, local Windows Python validation
+runs 34 tests: 32 passed, two actual symlink fixtures skipped for host privilege.
+The normal Git/ownership checks are retained; no platform-wide safety bypass was
+introduced. Exact logs are in private `target/phase6/`.
+
+### Physical relocation result
+
+**Gate 6: LAYOUT_PENDING.** Windows rejected the first complete-directory move
+before any path changed. After external editors/terminal handles were released,
+a second attempt from the external parent was also rejected. Read-only native
+handle inspection found remaining old-root directory handles in Codex's Node
+helpers. Resetting the two REPL kernels did not release those process-level
+handles. No application was forcibly terminated and no remote handle was closed.
+
+Both original repository paths remain intact, including their `.git` directories;
+neither the unique temporary path nor the final child paths exists. No partial
+copy, replacement Git repository, parent Git/Cargo workspace or dependency
+override was created. There is consequently **no claim of builds from the new
+paths** and no claim that the final physical layout or parent bootstrap ran.
+
+Private evidence retains the first attempt and updated preflight snapshots,
+failure stage/path state, read-only handle inspection, and verified full-history
+bundles for both repositories. The local `PHASE6_RESUME.md` gives exact paths and
+commands. The reviewed `complete-phase6.ps1` defaults to a preflight preview;
+with explicit `-Apply`, it invokes the complete-directory mover, compares Git
+invariants, runs bootstrap preview/apply, then each repository's boundary guard
+and role build. It checks every native exit code and leaves the Phase 5 manual
+items open. It never commits or pushes.
+
+To resume, save and exit sessions that hold the old directory (including the
+Codex session's helpers), then run that local script from an external PowerShell.
+Do not rerun blindly after a partial move: inspect the recorded stage and follow
+the stage-specific recovery instructions. After successful relocation, open the
+generated relative-path `Quadrant.code-workspace` or the intended child Git root.
+The saved parent project path becomes coordination, not the Tasks Git root.
+
+[Phase 6 tool checkpoint CI 34011358631](https://github.com/wadaxiyang/Quadrant-Tasks/actions/runs/34011358631)
+passed all four jobs at exactly `da4d6741f4ea965491f6e25326391ecce410997f`:
+Linux quality, native Windows, native macOS and actual Rust 1.92.0. All three
+platforms ran the 34 Python tests successfully, including real symbolic-link
+fixtures on the hosted runners. This validates the committed bootstrap/tooling;
+it does not substitute for the blocked new-path builds. The final delivery
+checkpoint adds only this evidence and the layout status record. Kit's checkout
+remains clean and unchanged at `838ecfbead2d0a1966907ddd742cb6f34516d3f6` on
+`codex/extraction-candidate`.
