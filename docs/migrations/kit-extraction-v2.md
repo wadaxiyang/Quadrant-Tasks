@@ -1,5 +1,15 @@
 # Kit extraction v2 — migration ledger
 
+## Current checkpoint — Phase 6 accepted (2026-09-06)
+
+Gate 6: **PASS**. Both complete repositories now occupy the independent child
+roots `Quadrant/Quadrant-Tasks` and `Quadrant/Quadrant-Kit`. Git invariants,
+parent ownership, bootstrap, both boundary guards and native Windows role
+builds passed after relocation; details are in the final Phase 6 entry below.
+Earlier checkpoint statements in this chronological ledger retain their
+historical scope. Gate 5's native manual items remain open; overall migration
+is **IN_PROGRESS**. Phase 7 has not started.
+
 ## Scope and source
 
 - Specification: `Quadrant_Workspace_Extraction_SPEC_v2.md`, version 2.0.
@@ -653,7 +663,7 @@ runs 34 tests: 32 passed, two actual symlink fixtures skipped for host privilege
 The normal Git/ownership checks are retained; no platform-wide safety bypass was
 introduced. Exact logs are in private `target/phase6/`.
 
-### Physical relocation result
+### Initial physical relocation attempt (superseded below)
 
 **Gate 6: LAYOUT_PENDING.** Windows rejected the first complete-directory move
 before any path changed. After external editors/terminal handles were released,
@@ -693,3 +703,61 @@ it does not substitute for the blocked new-path builds. The final delivery
 checkpoint adds only this evidence and the layout status record. Kit's checkout
 remains clean and unchanged at `838ecfbead2d0a1966907ddd742cb6f34516d3f6` on
 `codex/extraction-candidate`.
+
+### Completed relocation and new-path acceptance
+
+The user ran the reviewed mover from an external PowerShell after releasing
+the old directory handles. It moved both entire repositories, including Git
+metadata and ignored evidence, into the final child roots. No replacement
+repository, copied source tree or dependency override was created. The parent
+has no `.git` or `Cargo.toml`, its ancestors have no Git/Cargo ownership, and
+the old Kit and unique intermediate paths are absent.
+
+The initial completion script then stopped on Cargo's ordinary `Compiling`
+stderr output: Windows PowerShell 5.1 promoted redirected native stderr into
+`NativeCommandError` under `ErrorActionPreference=Stop`. This was a script
+failure, not a Rust compiler failure. The private runner now captures native
+stdout/stderr directly through Python's subprocess API and checks the actual
+exit code. A `-ValidateOnly` entry verifies the recorded complete relocation
+and current Git identity before running checks, without invoking any move.
+PowerShell 5.1 regression cases pass for stderr with exit 0, captured streams,
+paths/arguments with spaces, rejection of exit 7, and a missing executable.
+
+The resumed Gallery build exposed a separate stale-cache failure: the moved
+Kit rlibs embedded the former `CARGO_MANIFEST_DIR`, and Gallery reported
+`Kit facade is missing`. The old root was confirmed in the cached libraries.
+Targeted `cargo clean -p quadrant-kit -p quadrant-kit-gallery` removed those
+packages' generated artifacts, then the locked Gallery build passed. Kit
+source, dependency cache and historical QA evidence were preserved. Both
+initial failures and their logs are retained in private relocation evidence.
+
+The acceptance checks ran at these exact revisions before this ledger-only
+record was added:
+
+| Repository | HEAD | Branch |
+|---|---|---|
+| Tasks | `d9b8b57a66271e2dc1db9b9a215c8cc1c5962456` | `codex/kit-product-cutover` |
+| Kit | `838ecfbead2d0a1966907ddd742cb6f34516d3f6` | `codex/extraction-candidate` |
+
+| New-root check | Result |
+|---|---|
+| Before/after/current HEAD, branch, remotes, refs/tags, history, status and shallow state, independently for both repositories | PASS, exact match before and after builds; both clean |
+| True independent Git roots; no parent/ancestor Git or Cargo workspace | PASS |
+| Tasks bootstrap preview and apply | PASS; four existing coordination files kept, editor paths relative |
+| Tasks `python scripts/check_ui_boundaries.py` | PASS; resolved Kit is the pinned public Git package |
+| Tasks `cargo build --locked -p quadrant-agent -p quadrant-app` | PASS |
+| Kit `python scripts/check_ui_boundaries.py` | PASS |
+| Kit `cargo build --locked -p quadrant-kit-gallery` | PASS after targeted cache cleanup |
+
+**Gate 6: PASS.** Private `phase6-layout/` retains the move snapshots,
+`validated-git.json`, per-command logs, native-runner regression results and
+`completion.json`; local coordination notes and recovery instructions were
+updated. Exact machine paths and recovery scripts stay outside both public
+repositories. The bootstrap/tooling CI result above remains tied to `da4d674`;
+this follow-up does not claim a new full platform run or new native GUI tests.
+
+Gate 5 remains open for actual system-tray reopen/Exit, visibly delivered
+scheduled reminders while the GUI is closed, and physical 200%/225% DPI plus
+cross-display movement. Overall migration remains **IN_PROGRESS**, and Phase 7
+is **NOT_STARTED**. The physical move and passing builds do not waive these
+remaining acceptance items.
