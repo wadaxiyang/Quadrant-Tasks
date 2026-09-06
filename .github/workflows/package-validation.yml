@@ -2,6 +2,18 @@ name: Package validation
 
 on:
   workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/package-validation.yml'
+      - 'packaging/**'
+      - 'scripts/verify_product_package.py'
+      - 'scripts/tests/test_product_package.py'
+  pull_request:
+    paths:
+      - '.github/workflows/package-validation.yml'
+      - 'packaging/**'
+      - 'scripts/verify_product_package.py'
+      - 'scripts/tests/test_product_package.py'
 
 permissions:
   contents: read
