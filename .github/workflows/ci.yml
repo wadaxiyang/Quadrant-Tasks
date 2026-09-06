@@ -47,6 +47,10 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       - run: python -m unittest discover -s scripts/tests -v
       - run: python scripts/check_ui_boundaries.py
+      - name: Native Agent and transport preflight
+        run: cargo test --locked -p quadrant-platform -p quadrant-agent
+        env:
+          TMPDIR: ${{ runner.os == 'macOS' && '/tmp' || runner.temp }}
       - run: cargo check --workspace --all-targets --locked
       - run: cargo test --workspace --locked
         env:

@@ -319,3 +319,19 @@ step; all existing tests remain enabled and retain their unique isolated profile
 directories. The matching local command is documented. This changes neither
 production profile discovery nor socket identity. Linux's complete workspace
 test run passes locally after the lint corrections.
+
+The short-root macOS rerun then reached the transport and exposed a production
+compatibility defect: interprocess 2.4.3's mode(0600) uses pre-bind descriptor
+fchmod, unsupported on Darwin. The macOS branch now binds inside the already
+verified owner-only 0700 directory, then applies 0600 to the filesystem socket
+before returning the listener. Other users cannot traverse that directory during
+the operation; peer UID authentication remains required. Linux keeps its existing
+pre-bind mode. No process-global umask change, unrestricted fallback, protocol
+change or profile-identity change was introduced.
+
+Three Unix native regression tests verify directory/socket ownership and modes
+with an authenticated ping/pong, rejection of permissive existing directories,
+and preservation of non-socket files at the endpoint path. They and the Agent
+tests pass on Linux, with strict platform/Agent Clippy. Native CI now runs this
+transport/Agent preflight before compiling the large Product UI, so transport
+failures are reported early. The final macOS result remains a required gate.
