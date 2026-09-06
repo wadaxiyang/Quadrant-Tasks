@@ -17,6 +17,28 @@ The Agent owns persistence and contains no Slint/Kit dependency. The GUI uses
 IPC, has no storage/SQLite dependency, and uses Kit only while building Slint.
 Gallery development belongs to the separate Quadrant-Kit repository.
 
+## Presentation layers
+
+| Location | Owns | Dependency direction |
+|---|---|---|
+| `ui/product/` | Product colors, DTOs, timer/layout semantics and icon aliases | Derives generic values from Kit globals |
+| `ui/components/` | Task rows, Inbox and other business composition | Product semantics and public Kit components |
+| `ui/views/` | Quadrants, Today, Focus, Review, Completed and other business pages | Business components and Product state |
+| `ui/app.slint` and window entries | MainWindow, QuickAddWindow, TaskEditorWindow exports and callbacks | Compose Product views; expose the reviewed host contract |
+| `crates/quadrant-ui/src/shell/` | Rust model/intent mapping, drafts and independent window creation/release | Presentation and protocol; no persistence or resident services |
+| `crates/quadrant-app/src/ipc/` | Client connection and delivery of Agent snapshots/updates | Local protocol and GUI adapter |
+
+All generic component imports go through the file facade `@quadrant-kit`.
+Tasks' Product facade and direct business imports do not create another generic
+Kit. The 27-name Product baseline includes the original 23 names and four
+semantic globals; the build also checks Rust host exports/method headers.
+Public component declarations, compiled contracts and native behavior are
+distinct evidence. Per-instance Theme/Palette/font initialization must happen
+for Main and each lazily created capture/editor window.
+
+See [application architecture](ARCHITECTURE.md) for process ownership and
+[Kit integration](KIT_INTEGRATION.md) for the deliberate revision-update flow.
+
 ## Checks
 
 Use the pinned Rust 1.94.1 toolchain and Python 3.11 or later. The declared
@@ -58,7 +80,10 @@ verify the Product guard, and include GPL and Fluent icon MIT notices. The
 hosts are required; the macOS archive remains unsigned. Release automation
 requires the selected source commit to equal the existing version tag.
 
-Phase 4 validates integration and synthetic native windows. Fresh no-sibling
+Acceptance history for integration, synthetic native windows, fresh no-sibling
 checkouts, package resource closure and isolated-profile dual-process business
-regression are the separate Phase 5 gate. Synthetic UI probes do not access a
-database or start the Agent.
+regression is in the migration ledger. Phase 5's final tray/reminder/physical-DPI
+items were closed by user acceptance on 2026-09-06; that confirmation is recorded
+separately from automated evidence. Synthetic UI probes do not access a database
+or start the Agent. Full modal accessibility/IME coverage remains a documented
+follow-up, not a claim implied by the extraction.

@@ -1,14 +1,16 @@
 # Kit extraction v2 — migration ledger
 
-## Current checkpoint — Phase 6 accepted (2026-09-06)
+## Current checkpoint — Phase 7 verification (2026-09-06)
 
 Gate 6: **PASS**. Both complete repositories now occupy the independent child
 roots `Quadrant/Quadrant-Tasks` and `Quadrant/Quadrant-Kit`. Git invariants,
 parent ownership, bootstrap, both boundary guards and native Windows role
 builds passed after relocation; details are in the final Phase 6 entry below.
 Earlier checkpoint statements in this chronological ledger retain their
-historical scope. Gate 5's native manual items remain open; overall migration
-is **IN_PROGRESS**. Phase 7 has not started.
+historical scope. The user accepted the three remaining Gate 5 manual items on
+2026-09-06; Gate 5 is **PASS (user acceptance)**. Phase 7 documentation and the
+Kit-only learning exercise are implemented; final revision CI is pending.
+Overall migration remains **IN_PROGRESS** until that final verification closes.
 
 ## Scope and source
 
@@ -761,3 +763,116 @@ scheduled reminders while the GUI is closed, and physical 200%/225% DPI plus
 cross-display movement. Overall migration remains **IN_PROGRESS**, and Phase 7
 is **NOT_STARTED**. The physical move and passing builds do not waive these
 remaining acceptance items.
+
+## Phase 5 manual closure and Phase 7 handoff (2026-09-06)
+
+The user explicitly confirmed that the three listed remaining Phase 5 items
+may be marked complete, and requested Phase 7. They are closed by **user
+acceptance**, attributed to that confirmation rather than to a new automated or
+agent-observed native run. Earlier NOT_RUN/limited-observation entries remain
+historical evidence and have not been rewritten as executed tests.
+
+| Remaining Phase 5 item | Closure |
+|---|---|
+| Actual system-tray reopen and Exit | PASS — user acceptance, 2026-09-06 |
+| Visible scheduled reminder while GUI is closed | PASS — user acceptance, 2026-09-06 |
+| Physical 200%/225% DPI and cross-display movement | PASS — user acceptance, 2026-09-06 |
+
+**Gate 5: PASS**, combining prior package/business execution with this explicit
+manual acceptance. This does not expand Kit's general keyboard/IME/a11y coverage.
+
+### Documentation and independent learning
+
+Tasks now has tracked architecture, development and Kit-integration guides,
+expanded Product-layer/window ownership and workspace recovery instructions,
+and README/AGENTS links to these canonical contracts. Only the three reviewed
+new public documents were added to the restrictive ignore allowlist; private
+manuals, the local SPEC copy, settings and evidence remain private. The optional
+editor flow uses the guard's actual Cargo-resolved manifest and a private
+file-facade mapping; no automatic settings writer or sibling source is required.
+
+Kit documentation now records the published/retained source, real consumer and
+platform evidence, versioning policy, current Gallery pages, resource/focus
+limitations and the executable learning exercise. Its documentation checkpoint is
+`0dddb472a67635d6389c75eb8bc46831b6d35083` on `codex/extraction-candidate`.
+Tasks still adopts the retained source `838ecfbead2d0a1966907ddd742cb6f34516d3f6`;
+there is no reason to change the production dependency for a documentation-only
+handoff. The retained candidate tag and Kit main were not moved.
+
+Only Kit was needed for the exercise: read `UiConstants.space_4` and Badge,
+build/run native Gallery, change Badge's internal corner radius from `12px` to
+`UiConstants.space_4`, run the guard and capture again, then restore exact source
+bytes and recapture. Overview's pill badges visibly became rounded rectangles;
+all three guards/builds/captures exited 0. The changed image differed, while the
+restored source and PNG hashes exactly matched their starting hashes. Scenario:
+Windows, Rust 1.94.1, Slint 1.17.1, winit-software, Light, page 0/preview 1,
+1040×800 at 100%. No trial component change was committed. Kit's ignored
+`target/phase7/learning/` holds logs, scenario manifests, PNGs and the result.
+
+Local documentation checks passed: both guards, rustfmt and role builds;
+Kit's 35 Python tests; Tasks' 34 Python tests with two local symlink fixtures
+skipped for host privilege. All 22 tracked/proposed Markdown files across both
+repositories have valid local link targets. Private `target/phase7/checks/` in
+each repository records commands and exit codes. Final hosted checks are recorded
+separately below so the old adopted-source CI is not confused with new doc SHAs.
+
+### Final extraction facts
+
+| Required record | Actual value / evidence |
+|---|---|
+| SPEC | Version 2.0; sections 11.9, 13 and 15 audited for this handoff |
+| Audited application source | `79632ca3dec2decce7f830879575c517f4e2a29e` |
+| Actual extraction source | `5a2262cd480d639673fa4f5dd406a9c7196361b5`; source bytes match the audit, preceding changes were ignore/ledger work |
+| Tasks pre-cutover | `d2b423d4b7f557116f6fe655dcc67aac60db2d7f`, retained by `pre-kit-cutover-20260906` |
+| Qualified Product cutover | `dc5497433a8ccfc7db9603dfadebdd54637c9995`; later Phase 5 fixes and their exact CI are recorded above |
+| Kit URL and adopted SHA | `https://github.com/wadaxiyang/Quadrant-Kit.git` at `838ecfbead2d0a1966907ddd742cb6f34516d3f6` |
+| Retained reference | `refs/tags/candidate/extraction-838ecfbead2d`; tag object `aa736b6873652d0c8dd8ea55df6d16bb5cec9f39`, peeled to the adopted SHA; protected from update/deletion |
+| Ownership/move records | Kit `scripts/extraction_manifest.json` and `asset_manifest.json`; Tasks `kit_source_v1.json`, Product API/asset baselines; phase records above |
+| Physical mapping | Original complete application repository → `Quadrant/Quadrant-Tasks`; independent complete Kit → `Quadrant/Quadrant-Kit`; local coordination parent is non-Git/non-Cargo |
+| Intentional API delta | 32 → 28 generic exports; four Product exports and Product colors/timer/layout/icon aliases retained in Tasks; other generic contracts preserved |
+| Platforms | Windows native, Linux quality/runtime smoke and macOS native build/package CI; real Rust 1.92 builds. No Android/iOS/Web support claim |
+| Final delivery references | Reported externally after commits; a commit does not pretend to contain its own final SHA |
+
+### SPEC 15.1 acceptance audit
+
+| Condition | Status and evidence |
+|---|---|
+| Parent not Git / cross-project Cargo | PASS — Phase 6 ancestor/root checks |
+| Original Tasks history and retained refs preserved | PASS — Phase 6 exact Git snapshots and bundles |
+| Independent public Kit with actual commit | PASS — Phase 3 publication, retained refs and consumer |
+| Correct ordinary checkout metadata and final paths | PASS — both `.git` directories moved intact; Phase 6 |
+| No required unversioned parent build/test/release files | PASS — independent checkouts, child CI and build roots |
+| Tasks uses public Git + full SHA with retention | PASS — manifest/lock and protected candidate |
+| No local source replacement | PASS — actual metadata guards and fresh no-sibling consumer/package runs |
+| Kit only at UI build boundary; Agent free of Slint/Kit | PASS — target-filtered resolved graphs and hosted guards |
+| Product/Gallery public facade imports | PASS — guards and compiled windows/probe |
+| 28 names and full declared API shapes | PASS — Kit baseline, 217 properties/13 callbacks/four enums, probe |
+| Product semantics removed from Kit | PASS — ownership baselines, imports and source checks |
+| Three window and Rust adapter contracts preserved | PASS — Product baseline, compilation and Phase 5 runtime |
+| Static closure stays within Kit package | PASS — distribution scanner and asset hashes |
+| Package includes closure/licenses/provenance | PASS — actual archive byte verification and package CI |
+| Icons/branding ownership and native resources preserved | PASS — Product/Kit asset maps and package runtime |
+| GPL/MIT and upstream attribution preserved | PASS — provenance, source headers and included notices |
+| Independent Gallery normal pages, no Inbox route | PASS — eight-page captures/config tests; Kit-only exercise |
+| API probe compiled and interactive examples present | PASS — Gallery builds and documented coverage |
+| Scene-specific screenshot identity | PASS — capture fixtures, full manifests and phase evidence |
+| Per-window theme and std-widgets coordination | PASS — host initialization and native multi-window evidence |
+| Automatic CI guards at actual source revisions | PASS for adopted source; final handoff revision checks pending below |
+| Quality/targets/checker tests | PASS for required source; local handoff checks pass, final CI pending below |
+| Neutral remote consumer and no-sibling Tasks build | PASS — Phases 3 and 5 isolated remote builds |
+| Paired GUI/Agent packaging, stable data/identity | PASS — Phase 5 native packages/business tests |
+| Required native Product behavior | PASS — Phase 5 execution plus explicit user acceptance of its final three items |
+| Package resources without checkout/Cargo cache | PASS — Phase 5 isolated extracted-package runtime evidence |
+| Self-contained child AGENTS and safe parent templates | PASS — reviewed rules and bootstrap filesystem/Git fixtures |
+| Reviewed docs tracked; private materials excluded | PASS — explicit allowlist and staged file/link audit |
+| Source/move/API/revision/results and P1 recorded | PASS — this ledger, provenance maps and current guides |
+| Kit-only Gallery learning | PASS — restored Badge exercise, native PNGs/logs |
+| No placeholder SHA, invented run or hidden P0 | PASS — exact revision records and attributed user acceptance; final CI still explicitly pending |
+
+Remaining P1: complete native keyboard/IME/screen-reader and state/backend
+coverage; ModalManager focus containment/restoration and nested-modal design;
+controlled cross-machine font parity for strict pixel comparisons. These are
+documented existing limits, not new migration P0. No redesign, toolchain upgrade,
+stable release or merge into default branches is included in this handoff.
+
+Gate 7 and final migration status remain **IN_PROGRESS** pending final handoff CI.

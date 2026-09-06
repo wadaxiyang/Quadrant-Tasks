@@ -8,6 +8,12 @@ Quadrant is a local-first, cross-platform four-quadrant task manager built with 
 
 The Rust application includes Quadrants, Today, Focus, Review, Completed history, reminders, Quick Add, desktop integration, and SQLite-consistent backup/restore.
 
+For maintenance start with [application architecture](docs/ARCHITECTURE.md),
+[Product UI boundaries](docs/UI_ARCHITECTURE.md), [development](docs/DEVELOPMENT.md)
+and [Kit integration](docs/KIT_INTEGRATION.md). The [workspace guide](docs/WORKSPACE.md)
+explains the two independent repositories; the [migration ledger](docs/migrations/kit-extraction-v2.md)
+records accepted revisions, evidence and remaining follow-ups.
+
 ## Build
 
 Quadrant runs a resident background Agent and a disposable Slint GUI. Build both

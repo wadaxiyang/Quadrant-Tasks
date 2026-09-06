@@ -38,3 +38,16 @@ native acceptance items in the migration ledger; moving folders does not waive t
 Machine-specific editor settings stay private. The generated workspace uses
 relative child paths. Any Tasks Slint library mapping must point to the package
 resolved by `cargo metadata --locked --format-version 1`, not to sibling Kit.
+
+See [KIT_INTEGRATION.md](KIT_INTEGRATION.md) for the verified local editor mapping
+and upgrade sequence, and [DEVELOPMENT.md](DEVELOPMENT.md) for independent build
+and package commands. Read each child AGENTS when coordinating both; opening a
+child Git root does not assume instructions outside it are loaded. Keep a single
+writer for each checkout, inspect status/HEAD/branch/remotes independently, and
+commit each repository's work separately. Local Kit edits do not update Tasks.
+
+After moving a previously built Kit checkout, cached helper rlibs can still
+embed the former `CARGO_MANIFEST_DIR`. If Gallery reports `Kit facade is missing`
+with intact sources, run `cargo clean -p quadrant-kit -p quadrant-kit-gallery`
+from Kit, then its locked Gallery build. Preserve historical QA output; do not
+copy source into the old directory or change Tasks to a sibling dependency.

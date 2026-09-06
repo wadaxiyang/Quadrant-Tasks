@@ -16,7 +16,9 @@ rename does not rename its binaries, database, profiles, IPC or application iden
   operations against a user's real profile. Preserve source attribution and licenses.
 - Keep one writer per checkout. Preserve user changes and published history.
 - Parent coordination is optional. See docs/WORKSPACE.md for the two-repository
-  workflow and docs/UI_ARCHITECTURE.md for Product ownership and contracts.
+  workflow, docs/ARCHITECTURE.md for process ownership, docs/UI_ARCHITECTURE.md
+  for Product contracts, docs/KIT_INTEGRATION.md for upgrades and editor mapping,
+  and docs/DEVELOPMENT.md for native development and packaging.
 
 Relevant checks, scaled to the change:
 
