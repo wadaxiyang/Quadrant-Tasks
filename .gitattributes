@@ -1,0 +1,5 @@
+# Preserve the exact upstream asset/license bytes on every checkout platform.
+/assets/icons/*.svg -text
+/assets/icons/LICENSE-MIT -text
+# Native shell entry points must also work from a Windows/WSL checkout.
+*.sh text eol=lf

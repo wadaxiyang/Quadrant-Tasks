@@ -280,3 +280,18 @@ Private command logs, pre-cutover contracts, lock review and native screenshots
 are under ignored target/phase4. Final optimized build and same-commit hosted CI
 results will be recorded below before declaring Gate 4. Phase 5 package/business
 regression and Phase 6 directory relocation have not been performed.
+
+### Hosted checkout correction
+
+The first candidate `f439d964302965b3313f3d4808b95366e7f67301` exposed a real
+Windows checkout difference in run 34005112838: core.autocrlf changed the original
+SVG bytes, so the Product asset hash guard correctly failed. Added repository
+attributes that preserve upstream SVG/MIT bytes and keep shell entry points LF.
+The asset hashes were not weakened or regenerated. A real temporary Git index
+and checkout with core.autocrlf=true now verifies byte-for-byte preservation;
+all **17 Python tests pass**. Linux/macOS had already passed the source guard.
+
+Local locked debug and optimized release builds of both quadrant-agent and
+quadrant-app also pass, along with the final all-targets check. Packaging scripts
+pass PowerShell parsing and native shell syntax checks using their committed
+bytes. This verifies packaging entry points, not Phase 5 package execution.

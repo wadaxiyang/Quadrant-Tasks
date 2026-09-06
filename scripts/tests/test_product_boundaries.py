@@ -3,7 +3,9 @@
 import copy
 import json
 import os
+import hashlib
 from pathlib import Path
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -182,6 +184,25 @@ class CargoTests(unittest.TestCase):
 class CurrentRepositoryTests(unittest.TestCase):
     def test_product_contracts_and_sources(self):
         self.assertEqual(check(metadata=False)['product_exports'],27)
+
+    def test_git_windows_checkout_preserves_asset_bytes(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root=Path(temporary)
+            (root/'.gitattributes').write_bytes((ROOT/'.gitattributes').read_bytes())
+            asset='assets/icons/quadrants-20-regular.svg'
+            path=root/asset
+            path.parent.mkdir(parents=True)
+            original=(ROOT/asset).read_bytes()
+            path.write_bytes(original)
+            def git(*args):
+                subprocess.run(['git','-c','core.autocrlf=true','-c','core.safecrlf=false',*args],cwd=root,check=True,capture_output=True)
+            git('init','-q')
+            git('add','.gitattributes',asset)
+            path.unlink()
+            git('checkout-index','--all','--force')
+            self.assertEqual(path.read_bytes(),original)
+            recorded=json.loads((ROOT/'scripts/product_assets_v1.json').read_text())['assets'][0]
+            self.assertEqual(hashlib.sha256(path.read_bytes()).hexdigest(),recorded['sha256'])
 
 
 if __name__ == '__main__':
