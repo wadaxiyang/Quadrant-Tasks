@@ -39,13 +39,23 @@ pub fn initialize_application_identity() -> Result<(), PlatformIntegrationError>
     #[cfg(target_os = "windows")]
     {
         use ::windows::core::HSTRING;
-        // SAFETY: the owned string remains live and the API retains its own copy.
-        unsafe {
-            ::windows::Win32::UI::Shell::SetCurrentProcessExplicitAppUserModelID(&HSTRING::from(
-                QUADRANT_AUMID,
-            ))
-        }
-        .map_err(PlatformIntegrationError::new)?;
+        use std::sync::OnceLock;
+        // This is process state, not Agent/profile state. Concurrent native calls
+        // from isolated Agent startup raced inside Shell32's allocation/free path.
+        // Serialize the first call and retain its result for every later caller.
+        static IDENTITY: OnceLock<Result<(), PlatformIntegrationError>> = OnceLock::new();
+        IDENTITY
+            .get_or_init(|| {
+                // SAFETY: initialization runs once per process; the owned string
+                // remains live for the call and Windows retains its own copy.
+                unsafe {
+                    ::windows::Win32::UI::Shell::SetCurrentProcessExplicitAppUserModelID(
+                        &HSTRING::from(QUADRANT_AUMID),
+                    )
+                }
+                .map_err(PlatformIntegrationError::new)
+            })
+            .clone()?;
     }
     Ok(())
 }
@@ -223,6 +233,45 @@ mod tests {
     use quadrant_application::{TodayContextSource, UtcTimestamp};
 
     use super::{DATABASE_FILE_NAME, PlatformTodayContextSource};
+
+    #[cfg(target_os = "windows")]
+    #[test]
+    fn concurrent_application_identity_initialization() {
+        const CHILD: &str = "QUADRANT_IDENTITY_STRESS_CHILD";
+        if std::env::var_os(CHILD).is_none() {
+            use std::os::windows::process::CommandExt;
+            let output = std::process::Command::new(std::env::current_exe().unwrap())
+                .args([
+                    "--exact",
+                    "tests::concurrent_application_identity_initialization",
+                ])
+                .env(CHILD, "1")
+                .creation_flags(0x0800_0000)
+                .output()
+                .unwrap();
+            assert!(
+                output.status.success(),
+                "identity initializer child failed: {}\n{}\n{}",
+                output.status,
+                String::from_utf8_lossy(&output.stdout),
+                String::from_utf8_lossy(&output.stderr)
+            );
+            return;
+        }
+        // A fresh process guarantees that these threads contend for the first
+        // initialization, independently of the parent test harness's ordering.
+        let start = std::sync::Barrier::new(32);
+        std::thread::scope(|scope| {
+            for _ in 0..32 {
+                scope.spawn(|| {
+                    start.wait();
+                    for _ in 0..64 {
+                        super::initialize_application_identity().unwrap();
+                    }
+                });
+            }
+        });
+    }
 
     #[test]
     fn rewrite_database_does_not_reuse_the_legacy_file_name() {

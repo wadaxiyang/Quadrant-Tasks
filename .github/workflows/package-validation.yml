@@ -8,12 +8,18 @@ on:
       - 'packaging/**'
       - 'scripts/verify_product_package.py'
       - 'scripts/tests/test_product_package.py'
+      - 'crates/**'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
   pull_request:
     paths:
       - '.github/workflows/package-validation.yml'
       - 'packaging/**'
       - 'scripts/verify_product_package.py'
       - 'scripts/tests/test_product_package.py'
+      - 'crates/**'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
 
 permissions:
   contents: read
