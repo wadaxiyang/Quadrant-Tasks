@@ -855,7 +855,7 @@ separately below so the old adopted-source CI is not confused with new doc SHAs.
 | Icons/branding ownership and native resources preserved | PASS — Product/Kit asset maps and package runtime |
 | GPL/MIT and upstream attribution preserved | PASS — provenance, source headers and included notices |
 | Independent Gallery normal pages, no Inbox route | PASS — eight-page captures/config tests; Kit-only exercise |
-| API probe compiled and interactive examples present | PASS — Gallery builds and documented coverage |
+| API probe compiled and interactive examples present | PASS after the 2026-09-07 Gallery interaction follow-up below; the initial build-only evidence was insufficient |
 | Scene-specific screenshot identity | PASS — capture fixtures, full manifests and phase evidence |
 | Per-window theme and std-widgets coordination | PASS — host initialization and native multi-window evidence |
 | Automatic CI guards at actual source revisions | PASS — adopted-source CI and both exact handoff revisions below |
@@ -902,3 +902,43 @@ The SPEC 15.1 audit is **PASS**, with the final three Phase 5 manual scenarios
 closed by the user's explicit acceptance rather than a fabricated automated run.
 **Gate 7: PASS. Final migration status: COMPLETE. Outstanding P0: none.**
 The existing P1 coverage limits above remain follow-up work after extraction.
+
+## Post-handoff Gallery interaction correction — 2026-09-07
+
+A stricter SPEC 8.6 audit found that IconButton, PageHeader and
+WindowControlButton appeared in Gallery but their shown specimens did not wire
+actions to observable results. The compile-only API probe did wire callbacks;
+that alone did not satisfy an operable Gallery example. The initial acceptance
+row above overstated its evidence. This follow-up closes that concrete gap.
+
+Kit commit `ec4010dd69e20921adcaa231c53bb6050e759cda` adds action counts and
+last-action labels in Icons, Controls and Navigation. Window specimens record
+Minimize/Maximize/Close while keeping Gallery open for repeated testing. The
+public component sources, API/default baselines and assets are unchanged.
+
+Native Windows mouse/keyboard validation passed after a locked Gallery build:
+
+| Specimen | Observed result |
+|---|---|
+| Icons IconButton | Mouse Add → 1/Add; Enter and Space on focused Delete → 2/Delete and 3/Delete |
+| Disabled IconButton | Clicking Dismiss leaves count 3; Tab from Delete skips the disabled specimen |
+| Controls IconButtons | Add/Edit/Delete clicks → counts 1/2/3 with corresponding labels |
+| PageHeader | Add item mouse/Enter/Space → counts 1/2/3 |
+| WindowControlButton | Minimize/Maximize/Close clicks → 1/2/3; focused Close Enter/Space → 4/5; Gallery stays open |
+| Feedback layout | Navigation text readable in Light/Medium, Dark/Medium and Dark/Compact |
+
+Reproduction steps are in [Kit Gallery documentation](https://github.com/wadaxiyang/Quadrant-Kit/blob/ec4010dd69e20921adcaa231c53bb6050e759cda/docs/GALLERY.md#observable-action-specimens).
+Native screenshots, accessibility snapshots and the tested binary/source hashes
+are retained as private local evidence. Ordinary Gallery backend selection was
+used; this run does not independently identify its renderer or claim full native
+accessibility/IME/backend coverage. The existing P1 limits remain unchanged.
+
+Local Kit checks passed: locked Gallery build, boundary/API guard, 35 Python
+tests, rustfmt and diff whitespace checks. The follow-up's hosted check record is
+[Kit CI 34074771895](https://github.com/wadaxiyang/Quadrant-Kit/actions/runs/34074771895)
+at the exact source above, separately from the earlier adoption/handoff runs.
+
+Tasks continues to consume the protected, reviewed Kit source
+`838ecfbead2d0a1966907ddd742cb6f34516d3f6`. This Gallery development-tool change
+does not require a Product dependency upgrade; this Tasks change only corrects
+and extends the acceptance ledger.
