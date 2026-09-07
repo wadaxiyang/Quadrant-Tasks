@@ -13,7 +13,7 @@ on:
       source_ref:
         description: Branch, tag, or commit to build
         required: true
-        default: master
+        default: main
         type: string
 
 env:
